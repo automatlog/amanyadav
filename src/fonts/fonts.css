@@ -1,0 +1,41 @@
+@font-face {
+    font-family: "Inter";
+    font-weight: 400;
+    src: url("./Inter-Medium.ttf");
+}
+
+@font-face {
+    font-family: "Inter";
+    font-weight: 400;
+    src: url("./Inter-Regular.ttf");
+}
+
+@font-face {
+    font-family: "Azonix";
+    font-weight: 400;
+    src: url("./Azonix.otf");
+}
+
+@font-face {
+    font-family: "Bruno Ace";
+    font-weight: 400;
+    src: url("./BrunoAce-Regular.ttf");
+}
+
+@font-face {
+    font-family: "MartianMono";
+    font-weight: 400;
+    src: url("./MartianMono-Bold.ttf");
+}
+
+@font-face {
+    font-family: "Ubuntu";
+    font-weight: 400;
+    src: url("./Ubuntu-Medium.ttf");
+}
+
+@font-face {
+    font-family: "Ubuntu";
+    font-weight: 400;
+    src: url("./Ubuntu-Regular.ttf");
+}
