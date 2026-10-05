@@ -1,0 +1,555 @@
+/* ============================================================
+   HOME — Figma frame "Home": 1440 x 3427.55, flex column,
+   align-items:center, padding 28px 0, gap 134px, background #000.
+   --u is one design pixel.
+   ============================================================ */
+
+.hm-scroll {
+  position: relative;
+  width: 100%;
+  overflow-x: hidden;
+  background: #000000;
+}
+
+@supports (width: 1cqw) {
+  .hm-scroll {
+    container-type: inline-size;
+  }
+}
+
+.hm-root {
+  /* One design pixel.
+     - width  : the frame must fit the container. `cqw` measures the content
+                box, so it excludes the scrollbar — `vw` would not.
+     - height : only a FLOOR, not the real fit. The landing screenful is
+                nav + about; with the decorative gap fully closed that needs
+                700 design px, so the frame never shrinks past 100vh/700.
+                Bounding it by the full 813 instead made the frame shrink ~27%
+                on any window wider than ~1.67:1 — every 16:9 laptop — which
+                left 200px of dead black down both sides.
+     - 1.4px  : stops the frame growing without limit on very large displays.
+     Without container-query units it renders at native 1440 scale. */
+  --hm-first-screen: 700;
+  --u: min(calc(100vh / var(--hm-first-screen)), 1px);
+
+  /* The nav -> about gap is decorative, the content is not, so the gap gives
+     way first: full 134 when there is room, closing toward 18 when there
+     isn't. 690 is the hero minus that floor. */
+  --hm-hero-gap: clamp(
+    calc(18 * var(--u)),
+    calc(100vh - 690 * var(--u)),
+    calc(134 * var(--u))
+  );
+
+  --hm-bezel-top: #6d6c6d;
+  --hm-bezel: #515051;
+  --hm-bezel-bottom: #454445;
+  --hm-edge: #2a2a2a;
+  --hm-inset: #1c1c1c;
+  --hm-red: #ff0000;
+  --hm-dim: #d6d6d6;
+
+  /* the frame's own auto-layout, verbatim */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: calc(28 * var(--u)) 0;
+  gap: calc(134 * var(--u));
+
+  width: calc(1440 * var(--u));
+  margin: 0 auto;
+  /* conduits deliberately run to the frame edge — clip at the frame, not at
+     the viewport, so they read identically above and below the --u cap */
+  overflow: hidden;
+  color: #ffffff;
+}
+
+@supports (width: 1cqw) {
+  .hm-root {
+    --u: min(calc(100cqw / 1440), calc(100vh / var(--hm-first-screen)), 1.4px);
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* the landing gap closes before the frame scales down */
+.hm-section#whoami {
+  margin-top: calc(var(--hm-hero-gap) - 134 * var(--u));
+}
+
+/* a section is a flex item sized exactly as its Figma group */
+.hm-section {
+  position: relative;
+  flex: none;
+  scroll-margin-top: calc(120 * var(--u));
+  pointer-events: none;
+}
+
+.hm-section-inner {
+  position: absolute;
+  inset: 0;
+}
+
+/* anything interactive opts back into pointer events */
+.hm-section a,
+.hm-section button,
+.hm-hit {
+  pointer-events: auto;
+}
+
+/* ---------- atmosphere ------------------------------------- */
+
+.hm-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  opacity: 0.04;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------- shared machined chrome -------------------------- */
+
+/* Machined face. The sheen and shade are FIXED-HEIGHT layers over the flat
+   spec colour — a full-height gradient would stretch across the 1238x687
+   projects bezel and wash its top band out to #6d6c6d instead of #515051. */
+.hm-bezel {
+  background-color: var(--hm-bezel);
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0)),
+    linear-gradient(0deg, rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0));
+  background-size:
+    100% calc(20 * var(--u)),
+    100% calc(16 * var(--u));
+  background-position:
+    top left,
+    bottom left;
+  background-repeat: no-repeat;
+  box-shadow:
+    inset 0 calc(1 * var(--u)) 0 rgba(255, 255, 255, 0.16),
+    inset 0 calc(-1 * var(--u)) 0 rgba(0, 0, 0, 0.45),
+    0 calc(6 * var(--u)) calc(24 * var(--u)) rgba(0, 0, 0, 0.55);
+}
+
+.hm-inset-panel {
+  background: var(--hm-inset);
+  box-shadow:
+    inset 0 calc(3 * var(--u)) calc(10 * var(--u)) rgba(0, 0, 0, 0.85),
+    inset 0 calc(-1 * var(--u)) 0 rgba(255, 255, 255, 0.045);
+}
+
+/* ---------- navigation -------------------------------------- */
+
+.hm-navlink {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  text-transform: uppercase;
+  color: var(--hm-red);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  transition: color 0.2s ease, text-shadow 0.25s ease, transform 0.2s ease;
+}
+
+.hm-navlink:hover,
+.hm-navlink:focus-visible {
+  color: #ff4a4a;
+  text-shadow: 0 0 calc(14 * var(--u)) rgba(255, 0, 0, 0.7);
+  transform: translateY(calc(-1 * var(--u)));
+}
+
+.hm-navlink::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(-7 * var(--u));
+  width: 0;
+  height: calc(2 * var(--u));
+  translate: -50% 0;
+  background: var(--hm-red);
+  box-shadow: 0 0 calc(8 * var(--u)) rgba(255, 0, 0, 0.9);
+  transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hm-navlink:hover::after,
+.hm-navlink:focus-visible::after {
+  width: 62%;
+}
+
+.hm-bell {
+  display: grid;
+  place-items: center;
+  padding: 0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.hm-bell:hover {
+  transform: scale(1.06);
+}
+
+.hm-bell:hover svg {
+  animation: hm-ring 0.6s ease-in-out;
+}
+
+@keyframes hm-ring {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(12deg); }
+  60% { transform: rotate(-9deg); }
+}
+
+/* ---------- pills / buttons --------------------------------- */
+
+.hm-pill {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+}
+
+.hm-pill:hover {
+  transform: translateY(calc(-3 * var(--u)));
+  box-shadow: 0 calc(10 * var(--u)) calc(26 * var(--u)) rgba(0, 0, 0, 0.6);
+}
+
+.hm-resume {
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* The label and arrow are siblings of the pill, painted on top of it. If they
+   take the hit, `:hover` never reaches the pill (it is not their ancestor) and
+   the lift flickers off. Let the anchor own the hover entirely. */
+.hm-resume > * {
+  pointer-events: none;
+}
+
+.hm-resume:hover .hm-pill {
+  transform: translateY(calc(-3 * var(--u)));
+  box-shadow: 0 calc(10 * var(--u)) calc(26 * var(--u)) rgba(0, 0, 0, 0.6);
+}
+
+.hm-resume:hover .hm-resume-arrow {
+  transform: translateY(calc(3 * var(--u)));
+}
+
+.hm-resume-arrow {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ---------- the identity card ------------------------------- */
+
+.hm-card-name {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  text-transform: uppercase;
+  white-space: pre-line;
+}
+
+/* ---------- link cards (education / achievements / community) */
+
+.hm-linkcard {
+  display: block;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.hm-linkcard .hm-linkcard-outline {
+  transition: stroke 0.25s ease;
+}
+
+.hm-linkcard:hover .hm-linkcard-outline,
+.hm-linkcard:focus-visible .hm-linkcard-outline {
+  stroke: #4a4a4a;
+}
+
+.hm-linkcard-arrow {
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hm-linkcard:hover .hm-linkcard-arrow,
+.hm-linkcard:focus-visible .hm-linkcard-arrow {
+  transform: translate(calc(3 * var(--u)), calc(-3 * var(--u)));
+}
+
+.hm-linkcard-title {
+  transition: color 0.25s ease;
+}
+
+.hm-linkcard:hover .hm-linkcard-title {
+  color: #ffffff;
+}
+
+/* ---------- projects ---------------------------------------- */
+
+/* The display slides through the work on a timer rather than being a click
+   target. The track is one screen-width per slide; --hm-slide is the index. */
+.hm-slider {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  transform: translateX(calc(var(--hm-slide, 0) * -100%));
+  transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+  will-change: transform;
+}
+
+.hm-slider > img {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+.hm-shot {
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+}
+
+/* Strip slots. Each one animates its own box, so picking a client reflows the
+   whole row: the chosen disc grows into the card and the rest slide aside.
+   Radius travels in design px (37.5 = a 75 disc's own half-width) so it
+   interpolates cleanly to the card's 10 instead of snapping. */
+.hm-work {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  padding: 0;
+  cursor: pointer;
+  background: #111111;
+  transition:
+    left 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+    top 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+    width 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+    height 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+    border-radius 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.3s ease;
+}
+
+.hm-work--active {
+  cursor: default;
+  box-shadow: 0 calc(14 * var(--u)) calc(34 * var(--u)) rgba(0, 0, 0, 0.7);
+}
+
+.hm-work-logo {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+  filter: brightness(1.5) contrast(1.05);
+  transition: filter 0.28s ease;
+}
+
+.hm-work:not(.hm-work--active):hover {
+  border-color: #515051 !important;
+}
+
+.hm-work:not(.hm-work--active):hover .hm-work-logo {
+  filter: brightness(1.85) contrast(1.05);
+}
+
+/* A landscape site shot cropped to this 147x196 card takes a narrow vertical
+   slice. Anchoring that slice LEFT lands it on the site's logo and nav rather
+   than slicing through centred headline text mid-word. A real portrait asset
+   (as Evara has) still wins — see `portrait` in WORKS. */
+.hm-work-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: left top;
+  display: block;
+}
+
+/* the active client's logo rides along with the card */
+.hm-work-badge {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  transition:
+    left 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+    top 0.62s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hm-work-badge img {
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+}
+
+/* stand-in art for a client with no captured screenshot */
+.hm-brandcard {
+  flex: 0 0 100%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(18 * var(--u));
+  background: radial-gradient(ellipse at 50% 40%, #191919 0%, #0b0b0b 70%);
+}
+
+.hm-brandcard img {
+  width: 26%;
+  max-height: 46%;
+  object-fit: contain;
+  filter: brightness(1.4);
+}
+
+.hm-brandcard span {
+  font-family: 'Azonix', sans-serif;
+  font-size: calc(22 * var(--u));
+  letter-spacing: calc(2 * var(--u));
+  color: #6f6f6f;
+  text-transform: uppercase;
+}
+
+.hm-work .hm-brandcard {
+  gap: calc(8 * var(--u));
+}
+
+.hm-work .hm-brandcard span {
+  font-size: calc(10 * var(--u));
+}
+
+/* ---------- skills ------------------------------------------ */
+
+/* The rack window. The mask softens both ends so a tile enters and leaves
+   rather than being chopped against the panel's inner edge. */
+.hm-marquee {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 calc(26 * var(--u)),
+    #000 calc(100% - 26 * var(--u)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent 0,
+    #000 calc(26 * var(--u)),
+    #000 calc(100% - 26 * var(--u)),
+    transparent 100%
+  );
+}
+
+/* Two identical runs side by side; sliding the track exactly one run's width
+   lands the second run where the first began, so the loop never snaps. The
+   left margin is half a gap, which centres the six visible tiles in the
+   window instead of leaving the whole gap on the right. */
+.hm-marquee-track {
+  display: flex;
+  width: max-content;
+  height: 100%;
+  margin-left: calc(19 * var(--u));
+  animation: hm-marquee var(--hm-marquee-dur, 32s) linear infinite;
+  will-change: transform;
+}
+
+.hm-marquee-run {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* let someone stop the row to look at a mark */
+.hm-marquee:hover .hm-marquee-track,
+.hm-marquee:focus-within .hm-marquee-track {
+  animation-play-state: paused;
+}
+
+@keyframes hm-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.hm-skill {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: calc(132 * var(--u));
+  height: calc(132 * var(--u));
+  margin-right: calc(38 * var(--u));
+  border-radius: calc(24 * var(--u));
+  background: #f2f2f2;
+  box-shadow:
+    inset 0 calc(2 * var(--u)) 0 rgba(255, 255, 255, 0.9),
+    0 calc(6 * var(--u)) calc(16 * var(--u)) rgba(0, 0, 0, 0.55);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+
+.hm-skill:hover {
+  transform: translateY(calc(-6 * var(--u)));
+  box-shadow:
+    inset 0 calc(2 * var(--u)) 0 rgba(255, 255, 255, 0.9),
+    0 calc(12 * var(--u)) calc(24 * var(--u)) rgba(0, 0, 0, 0.7);
+}
+
+.hm-skill svg {
+  width: 62%;
+  height: 62%;
+}
+
+/* ---------- contact ----------------------------------------- */
+
+.hm-social {
+  display: grid;
+  place-items: center;
+  text-decoration: none;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+}
+
+.hm-social:hover {
+  transform: translateY(calc(-4 * var(--u)));
+  border-color: var(--hm-red) !important;
+}
+
+.hm-social-tile {
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+}
+
+.hm-social-tile svg {
+  /* spec insets the glyph 18.75% of the icon box -> 38.47 inside a 53 tile */
+  width: 72.6%;
+  height: 72.6%;
+  fill: #000000;
+}
+
+.hm-social--empty {
+  cursor: default;
+}
+
+.hm-social--empty:hover {
+  transform: none;
+  border-color: var(--hm-bezel) !important;
+}
+
+/* ---------- reduced motion ---------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .hm-root *,
+  .hm-root *::before,
+  .hm-root *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

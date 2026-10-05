@@ -1,41 +1,57 @@
 @font-face {
     font-family: "Inter";
     font-weight: 400;
-    src: url("./Inter-Medium.ttf");
+    font-display: swap;
+    src: url("./Inter-Regular.ttf");
 }
 
 @font-face {
     font-family: "Inter";
-    font-weight: 400;
-    src: url("./Inter-Regular.ttf");
+    font-weight: 500;
+    font-display: swap;
+    src: url("./Inter-Medium.ttf");
 }
 
 @font-face {
     font-family: "Azonix";
     font-weight: 400;
+    font-display: swap;
     src: url("./Azonix.otf");
 }
 
 @font-face {
     font-family: "Bruno Ace";
     font-weight: 400;
+    font-display: swap;
     src: url("./BrunoAce-Regular.ttf");
+}
+
+/* Only the Bold cut ships — map both weights to it so the browser never
+   synthesises a faux-bold on top of an already-bold face. */
+@font-face {
+    font-family: "MartianMono";
+    font-weight: 400;
+    font-display: swap;
+    src: url("./MartianMono-Bold.ttf");
 }
 
 @font-face {
     font-family: "MartianMono";
-    font-weight: 400;
+    font-weight: 700;
+    font-display: swap;
     src: url("./MartianMono-Bold.ttf");
 }
 
 @font-face {
     font-family: "Ubuntu";
     font-weight: 400;
-    src: url("./Ubuntu-Medium.ttf");
+    font-display: swap;
+    src: url("./Ubuntu-Regular.ttf");
 }
 
 @font-face {
     font-family: "Ubuntu";
-    font-weight: 400;
-    src: url("./Ubuntu-Regular.ttf");
+    font-weight: 500;
+    font-display: swap;
+    src: url("./Ubuntu-Medium.ttf");
 }

@@ -1,0 +1,605 @@
+/* ============================================================
+   PRELOADER — "OBSIDIAN BOOT"
+   Figma geometry (1440x780) mapped onto a fluid unit so the panel
+   scales with the viewport instead of letterboxing.
+   1 design px === var(--u)
+   ============================================================ */
+
+.pl-root {
+  --u: clamp(0.66px, min(100vw / 1440, 100vh / 780), 1.18px);
+
+  --pl-void: #111111;
+  --pl-bezel-top: #6d6c6d;
+  --pl-bezel: #515051;
+  --pl-bezel-bottom: #454445;
+  --pl-edge: #2a2a2a;
+  --pl-inset: #1c1c1c;
+  --pl-red: #ff0000;
+
+  --pl-mono: "MartianMono", ui-monospace, monospace;
+  --pl-lcd: "Bruno Ace", "MartianMono", monospace;
+
+  /* fill ratio 0 -> 1, written from JS */
+  --p: 0;
+
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  overflow: hidden;
+  background: var(--pl-void);
+  color: #ffffff;
+  transform-origin: center center;
+}
+
+/* ---------- atmosphere ------------------------------------- */
+
+.pl-atmos {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* structural grid — barely there, gives the void a floor */
+.pl-grid {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: calc(72 * var(--u)) calc(72 * var(--u));
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 10%, transparent 78%);
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 45%, #000 10%, transparent 78%);
+}
+
+.pl-scanlines {
+  position: absolute;
+  inset: -4px;
+  background: repeating-linear-gradient(0deg, rgba(0, 0, 0, 0.42) 0 1px, transparent 1px 3px);
+  opacity: 0.34;
+  animation: pl-drift 8s linear infinite;
+}
+
+.pl-grain {
+  position: absolute;
+  inset: -25%;
+  opacity: 0.055;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)'/%3E%3C/svg%3E");
+  animation: pl-grain-shift 0.55s steps(4) infinite;
+}
+
+.pl-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 82% 76% at 50% 46%, transparent 46%, rgba(0, 0, 0, 0.45) 100%);
+}
+
+/* corner brackets — instrument-panel framing */
+.pl-tick {
+  position: absolute;
+  width: calc(26 * var(--u));
+  height: calc(26 * var(--u));
+  border: calc(1.4 * var(--u)) solid rgba(255, 255, 255, 0.16);
+  opacity: 0;
+  animation: pl-tick-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.pl-tick--tl {
+  top: calc(28 * var(--u));
+  left: calc(28 * var(--u));
+  border-right: 0;
+  border-bottom: 0;
+  animation-delay: 0.35s;
+}
+
+.pl-tick--tr {
+  top: calc(28 * var(--u));
+  right: calc(28 * var(--u));
+  border-left: 0;
+  border-bottom: 0;
+  animation-delay: 0.42s;
+}
+
+.pl-tick--bl {
+  bottom: calc(28 * var(--u));
+  left: calc(28 * var(--u));
+  border-right: 0;
+  border-top: 0;
+  animation-delay: 0.49s;
+}
+
+.pl-tick--br {
+  bottom: calc(28 * var(--u));
+  right: calc(28 * var(--u));
+  border-left: 0;
+  border-top: 0;
+  animation-delay: 0.56s;
+}
+
+/* ---------- shared chrome ---------------------------------- */
+
+.pl-bezel {
+  background: linear-gradient(180deg, var(--pl-bezel-top) 0%, var(--pl-bezel) 46%, var(--pl-bezel-bottom) 100%);
+  border-style: solid;
+  border-color: var(--pl-edge);
+  box-shadow:
+    inset 0 calc(1 * var(--u)) 0 rgba(255, 255, 255, 0.18),
+    inset 0 calc(-1 * var(--u)) 0 rgba(0, 0, 0, 0.5),
+    0 calc(4 * var(--u)) calc(18 * var(--u)) rgba(0, 0, 0, 0.6);
+}
+
+.pl-inset {
+  background: var(--pl-inset);
+  border: calc(1.1 * var(--u)) solid #000000;
+  box-shadow:
+    inset 0 calc(2 * var(--u)) calc(7 * var(--u)) rgba(0, 0, 0, 0.9),
+    inset 0 calc(-1 * var(--u)) 0 rgba(255, 255, 255, 0.05);
+}
+
+/* ---------- the mark --------------------------------------- */
+
+.pl-mark {
+  position: absolute;
+  left: 50%;
+  /* Anchored to the console, not the top edge: 93 (console offset) + 35 (rail)
+     + 9 (gap) + 12 (status line) + 25 (design gap) = 174. At 1440x780 that
+     lands the mark exactly where Figma puts it, and on taller viewports the
+     group stays composed instead of splitting apart. */
+  bottom: calc(174 * var(--u));
+  width: calc(607 * var(--u));
+  height: calc(607 * var(--u));
+  translate: -50% 0;
+  animation:
+    pl-mark-boot 1.5s cubic-bezier(0.16, 1, 0.3, 1) both,
+    pl-mark-hover 6s ease-in-out 1.2s infinite;
+}
+
+.pl-mark-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  user-select: none;
+  filter: drop-shadow(0 calc(16 * var(--u)) calc(26 * var(--u)) rgba(0, 0, 0, 0.55));
+}
+
+/* red sweep, clipped to the silhouette by the logo's own alpha */
+.pl-mark-scan {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask: var(--mark) center / contain no-repeat;
+  mask: var(--mark) center / contain no-repeat;
+}
+
+.pl-mark-beam {
+  position: absolute;
+  left: -10%;
+  right: -10%;
+  height: 26%;
+  background: linear-gradient(180deg, transparent 0%, rgba(255, 26, 26, 0.7) 46%, rgba(255, 140, 140, 0.9) 53%, transparent 100%);
+  filter: blur(calc(3 * var(--u)));
+  animation: pl-sweep 4.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+/* ---------- console: status line + progress rail ------------ */
+
+.pl-console {
+  position: absolute;
+  left: 50%;
+  bottom: calc(93 * var(--u));
+  width: calc(700 * var(--u));
+  translate: -50% 0;
+  animation: pl-rise 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
+}
+
+.pl-status {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(16 * var(--u));
+  padding: 0 calc(15 * var(--u));
+  margin-bottom: calc(9 * var(--u));
+  font-family: var(--pl-mono);
+  font-weight: 700;
+  font-size: clamp(8px, calc(10 * var(--u)), 11.5px);
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+}
+
+.pl-status-label {
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.pl-caret {
+  color: var(--pl-red);
+  animation: pl-blink 1.05s steps(1) infinite;
+}
+
+.pl-pct {
+  color: var(--pl-red);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 calc(8 * var(--u)) rgba(255, 0, 0, 0.7);
+}
+
+.pl-rail {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: calc(35 * var(--u));
+  padding: calc(2.4 * var(--u));
+  border-width: calc(2.54 * var(--u));
+  border-radius: calc(20.28 * var(--u));
+}
+
+.pl-track {
+  position: relative;
+  flex: 1;
+  height: calc(25 * var(--u));
+  border-radius: calc(15.21 * var(--u));
+  overflow: hidden;
+}
+
+/* glass sheen across the recessed track */
+.pl-track::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07) 0%, transparent 42%);
+  pointer-events: none;
+}
+
+/* dash channel — 10px inset from the track, matching Line 30 */
+.pl-dashes {
+  position: absolute;
+  left: calc(10 * var(--u));
+  right: calc(10 * var(--u));
+  top: 50%;
+  height: calc(3 * var(--u));
+  translate: 0 -50%;
+}
+
+/* the dash pattern is defined in absolute units, so it stays pinned
+   to the left edge no matter how wide the lit layer grows */
+.pl-dash-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  border-radius: calc(2 * var(--u));
+  background-image: repeating-linear-gradient(
+    90deg,
+    currentColor 0 calc(30 * var(--u)),
+    transparent calc(30 * var(--u)) calc(44 * var(--u))
+  );
+}
+
+.pl-dash-layer--dim {
+  right: 0;
+  color: rgba(255, 255, 255, 0.09);
+}
+
+.pl-dash-layer--lit {
+  width: calc(var(--p) * 100%);
+  color: var(--pl-red);
+  filter: drop-shadow(0 0 calc(5 * var(--u)) rgba(255, 0, 0, 0.85));
+}
+
+/* leading edge — a hot slug of light riding the fill */
+.pl-head {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--p) * 100%);
+  width: calc(3 * var(--u));
+  height: calc(13 * var(--u));
+  translate: -50% -50%;
+  border-radius: calc(2 * var(--u));
+  background: #ffe4e4;
+  box-shadow:
+    0 0 calc(8 * var(--u)) calc(2 * var(--u)) rgba(255, 0, 0, 0.9),
+    0 0 calc(22 * var(--u)) calc(6 * var(--u)) rgba(255, 0, 0, 0.4);
+  opacity: 0.95;
+}
+
+/* ---------- clock module (top-right) ------------------------ */
+
+.pl-clock {
+  box-sizing: border-box;
+  position: absolute;
+  top: calc(60 * var(--u));
+  right: calc(53 * var(--u));
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: calc(200 * var(--u));
+  height: calc(40 * var(--u));
+  padding: calc(5 * var(--u)) calc(6 * var(--u));
+  border-width: calc(3.48 * var(--u));
+  border-radius: calc(10 * var(--u));
+  animation: pl-drop 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
+}
+
+.pl-display {
+  display: grid;
+  place-items: center;
+  width: calc(93 * var(--u));
+  height: calc(30 * var(--u));
+  border-radius: calc(5 * var(--u));
+  overflow: hidden;
+}
+
+.pl-time {
+  font-family: var(--pl-lcd);
+  font-size: clamp(12px, calc(17 * var(--u)), 19px);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: var(--pl-red);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 calc(10 * var(--u)) rgba(255, 0, 0, 0.75);
+  white-space: nowrap;
+}
+
+.pl-time i {
+  font-style: normal;
+  padding: 0 calc(5 * var(--u));
+  /* pulses like an LED clock instead of vanishing outright */
+  animation: pl-blink-soft 2s ease-in-out infinite;
+}
+
+.pl-knob {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: calc(30 * var(--u));
+  height: calc(30 * var(--u));
+  border-radius: 50%;
+  margin-right: calc(2 * var(--u));
+}
+
+/* activity LED inside the knob */
+.pl-knob::after {
+  content: "";
+  width: calc(8 * var(--u));
+  height: calc(8 * var(--u));
+  border-radius: 50%;
+  background: var(--pl-red);
+  box-shadow: 0 0 calc(10 * var(--u)) calc(1 * var(--u)) rgba(255, 0, 0, 0.85);
+  animation: pl-led 1.6s ease-in-out infinite;
+}
+
+/* ---------- footer plate (bottom-left) ---------------------- */
+
+.pl-footer {
+  box-sizing: border-box;
+  position: absolute;
+  left: calc(78 * var(--u));
+  bottom: calc(26 * var(--u));
+  width: calc(250 * var(--u));
+  height: calc(50 * var(--u));
+  padding: calc(5 * var(--u));
+  border-width: calc(4.17 * var(--u));
+  border-radius: calc(10 * var(--u));
+  animation: pl-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.3s both;
+}
+
+.pl-plate {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: calc(5 * var(--u));
+  height: 100%;
+  padding: 0 calc(9 * var(--u));
+  border-radius: calc(5 * var(--u));
+  font-family: var(--pl-mono);
+  font-weight: 700;
+  font-size: clamp(7.5px, calc(10 * var(--u)), 11px);
+  line-height: 1.2;
+  color: #ffffff;
+}
+
+.pl-plate-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: calc(10 * var(--u));
+  white-space: nowrap;
+}
+
+.pl-link {
+  color: #ffffff;
+  text-decoration: none;
+  opacity: 0.92;
+  transition: color 0.18s ease, opacity 0.18s ease;
+}
+
+.pl-link:hover,
+.pl-link:focus-visible {
+  color: var(--pl-red);
+  opacity: 1;
+}
+
+.pl-tri {
+  width: calc(10 * var(--u));
+  height: calc(10 * var(--u));
+  rotate: 8deg;
+  overflow: visible;
+  flex: none;
+}
+
+.pl-tri path {
+  fill: none;
+  stroke: var(--pl-red);
+  stroke-width: 1.4;
+  stroke-linejoin: round;
+  animation: pl-blink-soft 2.4s ease-in-out infinite;
+}
+
+/* ---------- keyframes -------------------------------------- */
+
+@keyframes pl-mark-boot {
+  0% {
+    opacity: 0;
+    scale: 1.06;
+    filter: blur(calc(10 * var(--u)));
+  }
+  22% {
+    opacity: 0.85;
+  }
+  26% {
+    opacity: 0.15;
+  }
+  32% {
+    opacity: 0.95;
+  }
+  38% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 1;
+    scale: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes pl-mark-hover {
+  0%,
+  100% {
+    transform: translateY(calc(-7 * var(--u)));
+  }
+  50% {
+    transform: translateY(calc(7 * var(--u)));
+  }
+}
+
+@keyframes pl-sweep {
+  0% {
+    top: -30%;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  48% {
+    opacity: 1;
+  }
+  58%,
+  100% {
+    top: 112%;
+    opacity: 0;
+  }
+}
+
+@keyframes pl-drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes pl-grain-shift {
+  0% {
+    transform: translate(0, 0);
+  }
+  25% {
+    transform: translate(-2%, 1%);
+  }
+  50% {
+    transform: translate(1%, -2%);
+  }
+  75% {
+    transform: translate(-1%, -1%);
+  }
+  100% {
+    transform: translate(2%, 1%);
+  }
+}
+
+@keyframes pl-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0.12;
+  }
+}
+
+@keyframes pl-blink-soft {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+@keyframes pl-led {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.86);
+  }
+}
+
+@keyframes pl-rise {
+  from {
+    opacity: 0;
+    transform: translateY(calc(16 * var(--u)));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pl-drop {
+  from {
+    opacity: 0;
+    transform: translateY(calc(-16 * var(--u)));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pl-tick-in {
+  from {
+    opacity: 0;
+    scale: 0.7;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+
+/* ---------- reduced motion --------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .pl-root *,
+  .pl-root *::before,
+  .pl-root *::after {
+    animation: none !important;
+  }
+
+  .pl-mark,
+  .pl-console,
+  .pl-clock,
+  .pl-footer,
+  .pl-tick {
+    opacity: 1;
+    transform: none;
+  }
+}

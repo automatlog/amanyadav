@@ -1,0 +1,31 @@
+@import './fonts/fonts.css';
+@import 'tailwindcss';
+
+:root {
+  --bg-1: #0a0a0a;
+  --bg-2: #050505;
+  --accent-red: #ff0000;
+  --accent-orange: #ff5a00;
+  --text-main: #ffffff;
+  --text-muted: #b8b8b8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  color: var(--text-main);
+  background: #0a0a0a;
+  font-family: 'Inter', sans-serif;
+}
+
+a {
+  color: inherit;
+}
+
+#root {
+  min-height: 100vh;
+}
