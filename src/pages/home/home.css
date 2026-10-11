@@ -71,13 +71,12 @@
   }
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-@media (prefers-reduced-motion: reduce) {
+/* Motion is opt-IN: big movement lives inside `no-preference` blocks, so
+   anything added later without a guard stays still for people who asked for
+   less motion, rather than moving until someone remembers to switch it off. */
+@media (prefers-reduced-motion: no-preference) {
   html {
-    scroll-behavior: auto;
+    scroll-behavior: smooth;
   }
 }
 
@@ -94,7 +93,8 @@ html {
   pointer-events: none;
 }
 
-.hm-section-inner {
+.hm-section-inner,
+.hm-stage {
   position: absolute;
   inset: 0;
 }
@@ -104,6 +104,58 @@ html {
 .hm-section button,
 .hm-hit {
   pointer-events: auto;
+}
+
+/* ---------- interaction primitives ------------------------- */
+
+/* One focus ring for every control on the page. Keyboard-only (focus-visible),
+   in the page's own red, offset so it never sits on top of a bezel edge.
+   outline follows border-radius, so pills and discs get a matching ring. */
+.hm-scroll :is(a, button):focus-visible {
+  outline: calc(2 * var(--u)) solid var(--hm-red);
+  outline-offset: calc(4 * var(--u));
+}
+
+.hm-scroll :is(a, button):focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Pressed controls give a little: 0.97, eased out over 200ms. The `scale`
+   property composes with the hover `transform` instead of replacing it.
+   Each control lists `scale` in its own transition so neither overrides. */
+@media (prefers-reduced-motion: no-preference) {
+  .hm-press:active {
+    scale: 0.97;
+  }
+}
+
+/* First Tab stop on the page. Off-screen until focused, then it drops in at
+   the top-left above everything, so keyboard users can jump the nav. */
+.hm-skip {
+  position: fixed;
+  top: calc(12 * var(--u));
+  left: calc(12 * var(--u));
+  z-index: 10;
+  padding: calc(10 * var(--u)) calc(16 * var(--u));
+  border-radius: calc(10 * var(--u));
+  background: #ffffff;
+  color: #000000;
+  font: 500 calc(16 * var(--u)) / 1 'Inter', sans-serif;
+  text-decoration: none;
+  white-space: nowrap;
+  translate: 0 calc(-200% - 12 * var(--u));
+}
+
+.hm-skip:focus-visible {
+  translate: 0 0;
+}
+
+/* Images get a hairline edge so a dark screenshot never bleeds into the black
+   around it: white at 8%, drawn 1px INSIDE the image box. */
+.hm-slider > img,
+.hm-work-art {
+  outline: 1px solid rgba(255, 255, 255, 0.08);
+  outline-offset: -1px;
 }
 
 /* ---------- atmosphere ------------------------------------- */
@@ -160,14 +212,36 @@ html {
   border: 0;
   padding: 0;
   cursor: pointer;
-  transition: color 0.2s ease, text-shadow 0.25s ease, transform 0.2s ease;
+  white-space: nowrap;
+  /* softens the focus ring to sit with the pill-shaped nav around it */
+  border-radius: calc(6 * var(--u));
+  transition:
+    color 0.15s ease,
+    text-shadow 0.15s ease,
+    transform 0.2s ease,
+    scale 0.2s ease-out;
 }
 
-.hm-navlink:hover,
+/* The label is 29 tall; the target should be 40+. Extend the hit area past
+   the glyphs without moving them — the gaps between labels are ~70, so the
+   enlarged areas never meet. */
+.hm-navlink::before {
+  content: "";
+  position: absolute;
+  inset: calc(-6 * var(--u)) calc(-10 * var(--u));
+}
+
 .hm-navlink:focus-visible {
   color: #ff4a4a;
   text-shadow: 0 0 calc(14 * var(--u)) rgba(255, 0, 0, 0.7);
-  transform: translateY(calc(-1 * var(--u)));
+}
+
+@media (hover: hover) {
+  .hm-navlink:hover {
+    color: #ff4a4a;
+    text-shadow: 0 0 calc(14 * var(--u)) rgba(255, 0, 0, 0.7);
+    transform: translateY(calc(-1 * var(--u)));
+  }
 }
 
 .hm-navlink::after {
@@ -183,31 +257,38 @@ html {
   transition: width 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.hm-navlink:hover::after,
 .hm-navlink:focus-visible::after {
   width: 62%;
 }
 
-.hm-bell {
-  display: grid;
-  place-items: center;
-  padding: 0;
-  cursor: pointer;
-  transition: transform 0.2s ease;
+@media (hover: hover) {
+  .hm-navlink:hover::after {
+    width: 62%;
+  }
 }
 
-.hm-bell:hover {
-  transform: scale(1.06);
+/* the @ in WHO@Mi, set white against the red */
+.hm-at {
+  color: #ffffff;
 }
 
-.hm-bell:hover svg {
-  animation: hm-ring 0.6s ease-in-out;
-}
+/* Status orb in the pill's end socket, at the library's own 64 preset — the
+   tuned design, not a scaled-down copy. Its sphere is 54.4 across, so it
+   fills the 49.9 socket edge to edge and its outermost dots reach the 2px
+   rim; nothing clips it. The library sizes its canvas inline in px, so the
+   size is restated here in design units (64 = native at --u 1) to scale with
+   the rest of the frame; !important is what beats the inline style.
 
-@keyframes hm-ring {
-  0%, 100% { transform: rotate(0deg); }
-  25% { transform: rotate(12deg); }
-  60% { transform: rotate(-9deg); }
+   Centred absolutely, not with grid: a grid item LARGER than its container
+   is not centred by place-items — the track just grows from the top-left
+   and all 14 of overflow lands on the right and bottom. */
+.hm-orb canvas {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% -50%;
+  width: calc(64 * var(--u)) !important;
+  height: calc(64 * var(--u)) !important;
 }
 
 /* ---------- pills / buttons --------------------------------- */
@@ -216,15 +297,16 @@ html {
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
 }
 
-.hm-pill:hover {
-  transform: translateY(calc(-3 * var(--u)));
-  box-shadow: 0 calc(10 * var(--u)) calc(26 * var(--u)) rgba(0, 0, 0, 0.6);
-}
-
+/* No hover on the identity cluster: it is not a control, so lifting it
+   promised a click that does nothing. The Resume pill still lifts — through
+   .hm-resume:hover below, because it IS a link. */
 .hm-resume {
   display: block;
   text-decoration: none;
   cursor: pointer;
+  /* the focus ring follows this, so it has to be the pill's own shape */
+  border-radius: 9999px;
+  transition: scale 0.2s ease-out;
 }
 
 /* The label and arrow are siblings of the pill, painted on top of it. If they
@@ -234,12 +316,18 @@ html {
   pointer-events: none;
 }
 
-.hm-resume:hover .hm-pill {
-  transform: translateY(calc(-3 * var(--u)));
-  box-shadow: 0 calc(10 * var(--u)) calc(26 * var(--u)) rgba(0, 0, 0, 0.6);
+@media (hover: hover) {
+  .hm-resume:hover .hm-pill {
+    transform: translateY(calc(-3 * var(--u)));
+    box-shadow: 0 calc(10 * var(--u)) calc(26 * var(--u)) rgba(0, 0, 0, 0.6);
+  }
+
+  .hm-resume:hover .hm-resume-arrow {
+    transform: translateY(calc(3 * var(--u)));
+  }
 }
 
-.hm-resume:hover .hm-resume-arrow {
+.hm-resume:focus-visible .hm-resume-arrow {
   transform: translateY(calc(3 * var(--u)));
 }
 
@@ -264,32 +352,232 @@ html {
   display: block;
   text-decoration: none;
   cursor: pointer;
+  border-radius: calc(26 * var(--u));
+  transition: scale 0.2s ease-out;
 }
 
 .hm-linkcard .hm-linkcard-outline {
-  transition: stroke 0.25s ease;
+  transition: stroke 0.15s ease;
 }
 
-.hm-linkcard:hover .hm-linkcard-outline,
 .hm-linkcard:focus-visible .hm-linkcard-outline {
   stroke: #4a4a4a;
 }
 
-.hm-linkcard-arrow {
-  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+/* The arrow flies through its capsule: the one at rest leaves through the
+   top while a second, parked below the window, rises into place. Both move
+   by their own height, so each clears the pill completely. Transitions, not
+   keyframes, so leaving mid-way simply reverses it. */
+.hm-linkcard-capsule {
+  overflow: hidden;
 }
 
-.hm-linkcard:hover .hm-linkcard-arrow,
-.hm-linkcard:focus-visible .hm-linkcard-arrow {
-  transform: translate(calc(3 * var(--u)), calc(-3 * var(--u)));
+.hm-linkcard-arrow--next {
+  transform: translateY(100%);
+}
+
+.hm-linkcard-arrow path {
+  transition: stroke 0.15s ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hm-linkcard-arrow {
+    transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* the newcomer starts a beat after the leaver, so they read as two */
+  .hm-linkcard-arrow--next {
+    transition-delay: 0.05s;
+  }
+
+  .hm-linkcard:focus-visible .hm-linkcard-arrow {
+    transform: translateY(-100%);
+  }
+
+  .hm-linkcard:focus-visible .hm-linkcard-arrow--next {
+    transform: translateY(0);
+  }
+}
+
+/* Reduced motion: no flight — one arrow, and it turns red instead. */
+@media (prefers-reduced-motion: reduce) {
+  .hm-linkcard-arrow--next {
+    display: none;
+  }
+
+  .hm-linkcard:focus-visible .hm-linkcard-arrow path {
+    stroke: #ff4a4a;
+  }
 }
 
 .hm-linkcard-title {
-  transition: color 0.25s ease;
+  transition: color 0.15s ease;
 }
 
-.hm-linkcard:hover .hm-linkcard-title {
+.hm-linkcard:focus-visible .hm-linkcard-title {
   color: #ffffff;
+}
+
+@media (hover: hover) {
+  .hm-linkcard:hover .hm-linkcard-outline {
+    stroke: #4a4a4a;
+  }
+
+
+  .hm-linkcard:hover .hm-linkcard-title {
+    color: #ffffff;
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .hm-linkcard:hover .hm-linkcard-arrow {
+    transform: translateY(-100%);
+  }
+
+  .hm-linkcard:hover .hm-linkcard-arrow--next {
+    transform: translateY(0);
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: reduce) {
+  .hm-linkcard:hover .hm-linkcard-arrow path {
+    stroke: #ff4a4a;
+  }
+}
+
+/* the link cards' content, under the hairline */
+.hm-linkcard-body {
+  display: flex;
+  flex-direction: column;
+  gap: calc(5 * var(--u));
+}
+
+.hm-linkcard-lead {
+  font: 500 calc(13.5 * var(--u)) / 1.3 'Inter', sans-serif;
+  color: #ffffff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hm-linkcard-detail {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font: 400 calc(12.5 * var(--u)) / 1.4 'Inter', sans-serif;
+  color: #9a9a9a;
+}
+
+.hm-linkcard-meta {
+  text-align: right;
+  font: 700 calc(10.5 * var(--u)) / 1.2 'MartianMono', monospace;
+  letter-spacing: calc(0.5 * var(--u));
+  text-transform: uppercase;
+  color: #6a6a6a;
+}
+
+/* ---------- experience timeline ---------------------------- */
+
+.hm-timeline {
+  margin: 0;
+  padding: 0 0 0 calc(34 * var(--u));
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: calc(18 * var(--u));
+}
+
+/* the rail: one hairline down the left, from the first node to the last */
+.hm-timeline::before {
+  content: "";
+  position: absolute;
+  left: calc(6 * var(--u));
+  top: calc(12 * var(--u));
+  bottom: calc(40 * var(--u));
+  width: calc(1 * var(--u));
+  background: linear-gradient(#7e7e7e, #2a2a2a);
+}
+
+.hm-role {
+  position: relative;
+}
+
+/* a node per role: filled grey dot; the current role gets the hollow ring */
+.hm-role::before {
+  content: "";
+  position: absolute;
+  left: calc(-34 * var(--u) + 1.5 * var(--u));
+  top: calc(7 * var(--u));
+  width: calc(10 * var(--u));
+  height: calc(10 * var(--u));
+  border-radius: 50%;
+  background: #7e7e7e;
+}
+
+.hm-role--current::before {
+  background: #000000;
+  box-shadow: inset 0 0 0 calc(2.4 * var(--u)) var(--hm-red);
+}
+
+.hm-role-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: calc(16 * var(--u));
+}
+
+.hm-role-title {
+  margin: 0;
+  font: 500 calc(20 * var(--u)) / 1.2 'Inter', sans-serif;
+  color: #ffffff;
+  white-space: nowrap;
+}
+
+.hm-role-company {
+  color: #8a8a8a;
+  font-weight: 400;
+}
+
+.hm-role-period {
+  flex: none;
+  font: 700 calc(12 * var(--u)) / 1 'MartianMono', monospace;
+  letter-spacing: calc(0.5 * var(--u));
+  text-transform: uppercase;
+  color: #8a8a8a;
+  font-variant-numeric: tabular-nums;
+}
+
+.hm-role--current .hm-role-period {
+  color: #ff4a4a;
+}
+
+.hm-role-summary {
+  margin: calc(8 * var(--u)) 0 0;
+  max-width: calc(690 * var(--u));
+  font: 400 calc(14.5 * var(--u)) / 1.55 'Inter', sans-serif;
+  color: #b8b8b8;
+  text-wrap: pretty;
+}
+
+.hm-role-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(8 * var(--u));
+  margin: calc(10 * var(--u)) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hm-role-tags li {
+  padding: calc(4 * var(--u)) calc(10 * var(--u));
+  border-radius: 9999px;
+  border: calc(1 * var(--u)) solid var(--hm-edge);
+  font: 700 calc(11 * var(--u)) / 1.2 'MartianMono', monospace;
+  letter-spacing: calc(0.5 * var(--u));
+  text-transform: uppercase;
+  color: #8a8a8a;
+  white-space: nowrap;
 }
 
 /* ---------- projects ---------------------------------------- */
@@ -301,8 +589,13 @@ html {
   inset: 0;
   display: flex;
   transform: translateX(calc(var(--hm-slide, 0) * -100%));
-  transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
   will-change: transform;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hm-slider {
+    transition: transform 0.9s cubic-bezier(0.65, 0, 0.35, 1);
+  }
 }
 
 .hm-slider > img {
@@ -331,13 +624,20 @@ html {
   padding: 0;
   cursor: pointer;
   background: #111111;
-  transition:
-    left 0.62s cubic-bezier(0.16, 1, 0.3, 1),
-    top 0.62s cubic-bezier(0.16, 1, 0.3, 1),
-    width 0.62s cubic-bezier(0.16, 1, 0.3, 1),
-    height 0.62s cubic-bezier(0.16, 1, 0.3, 1),
-    border-radius 0.62s cubic-bezier(0.16, 1, 0.3, 1),
-    border-color 0.3s ease;
+  transition: border-color 0.15s ease;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hm-work {
+    transition:
+      left 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+      top 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+      width 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+      height 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+      border-radius 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+      border-color 0.15s ease,
+      scale 0.2s ease-out;
+  }
 }
 
 .hm-work--active {
@@ -350,15 +650,17 @@ html {
   height: 68%;
   object-fit: contain;
   filter: brightness(1.5) contrast(1.05);
-  transition: filter 0.28s ease;
+  transition: filter 0.15s ease;
 }
 
-.hm-work:not(.hm-work--active):hover {
-  border-color: #515051 !important;
-}
+@media (hover: hover) {
+  .hm-work:not(.hm-work--active):hover {
+    border-color: #515051 !important;
+  }
 
-.hm-work:not(.hm-work--active):hover .hm-work-logo {
-  filter: brightness(1.85) contrast(1.05);
+  .hm-work:not(.hm-work--active):hover .hm-work-logo {
+    filter: brightness(1.85) contrast(1.05);
+  }
 }
 
 /* A landscape site shot cropped to this 147x196 card takes a narrow vertical
@@ -378,9 +680,14 @@ html {
   display: grid;
   place-items: center;
   overflow: hidden;
-  transition:
-    left 0.62s cubic-bezier(0.16, 1, 0.3, 1),
-    top 0.62s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hm-work-badge {
+    transition:
+      left 0.62s cubic-bezier(0.16, 1, 0.3, 1),
+      top 0.62s cubic-bezier(0.16, 1, 0.3, 1);
+  }
 }
 
 .hm-work-badge img {
@@ -413,8 +720,11 @@ html {
   font-family: 'Azonix', sans-serif;
   font-size: calc(22 * var(--u));
   letter-spacing: calc(2 * var(--u));
-  color: #6f6f6f;
+  /* #6f6f6f measured 3.5:1 on the #191919 behind it — under 4.5 for text
+     this size. #8a8a8a is 5.1:1 and still reads as a quiet caption. */
+  color: #8a8a8a;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .hm-work .hm-brandcard {
@@ -458,8 +768,15 @@ html {
   width: max-content;
   height: 100%;
   margin-left: calc(19 * var(--u));
-  animation: hm-marquee var(--hm-marquee-dur, 32s) linear infinite;
-  will-change: transform;
+}
+
+/* Runs only when motion is welcome; otherwise the rack rests on its first
+   tiles, which is a complete, readable row on its own. */
+@media (prefers-reduced-motion: no-preference) {
+  .hm-marquee-track {
+    animation: hm-marquee var(--hm-marquee-dur, 32s) linear infinite;
+    will-change: transform;
+  }
 }
 
 .hm-marquee-run {
@@ -468,10 +785,16 @@ html {
   height: 100%;
 }
 
-/* let someone stop the row to look at a mark */
-.hm-marquee:hover .hm-marquee-track,
+/* let someone stop the row to look at a mark — on touch a tap would leave
+   :hover stuck on and freeze the rack, so pointer-hover only */
 .hm-marquee:focus-within .hm-marquee-track {
   animation-play-state: paused;
+}
+
+@media (hover: hover) {
+  .hm-marquee:hover .hm-marquee-track {
+    animation-play-state: paused;
+  }
 }
 
 @keyframes hm-marquee {
@@ -480,45 +803,147 @@ html {
   }
 }
 
+/* Dark tiles in the site's own material — an inset face inside a 2 black
+   and a 3 bezel ring, the way the screen sits in the projects housing —
+   so the marks' brand colours carry the rack instead of white plates. */
 .hm-skill {
   flex: none;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: calc(12 * var(--u));
   width: calc(132 * var(--u));
   height: calc(132 * var(--u));
   margin-right: calc(38 * var(--u));
   border-radius: calc(24 * var(--u));
-  background: #f2f2f2;
+  background: var(--hm-inset);
   box-shadow:
-    inset 0 calc(2 * var(--u)) 0 rgba(255, 255, 255, 0.9),
-    0 calc(6 * var(--u)) calc(16 * var(--u)) rgba(0, 0, 0, 0.55);
+    0 0 0 calc(2 * var(--u)) #000000,
+    0 0 0 calc(5 * var(--u)) var(--hm-edge),
+    inset 0 calc(1 * var(--u)) 0 rgba(255, 255, 255, 0.06),
+    0 calc(8 * var(--u)) calc(18 * var(--u)) rgba(0, 0, 0, 0.6);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
 }
 
-.hm-skill:hover {
-  transform: translateY(calc(-6 * var(--u)));
-  box-shadow:
-    inset 0 calc(2 * var(--u)) 0 rgba(255, 255, 255, 0.9),
-    0 calc(12 * var(--u)) calc(24 * var(--u)) rgba(0, 0, 0, 0.7);
+.hm-skill-label {
+  font: 700 calc(11 * var(--u)) / 1 'MartianMono', monospace;
+  letter-spacing: calc(0.4 * var(--u));
+  text-transform: uppercase;
+  color: #8a8a8a;
+  white-space: nowrap;
+}
+
+@media (hover: hover) {
+  .hm-skill:hover {
+    transform: translateY(calc(-6 * var(--u)));
+    box-shadow:
+      0 0 0 calc(2 * var(--u)) #000000,
+      0 0 0 calc(5 * var(--u)) var(--hm-bezel),
+      inset 0 calc(1 * var(--u)) 0 rgba(255, 255, 255, 0.06),
+      0 calc(14 * var(--u)) calc(26 * var(--u)) rgba(0, 0, 0, 0.7);
+  }
 }
 
 .hm-skill svg {
-  width: 62%;
-  height: 62%;
+  width: 40%;
+  height: 40%;
 }
 
 /* ---------- contact ----------------------------------------- */
+
+.hm-contact-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hm-contact-row {
+  display: grid;
+  grid-template-columns: calc(22 * var(--u)) calc(120 * var(--u)) 1fr calc(18 * var(--u));
+  align-items: center;
+  gap: calc(14 * var(--u));
+  height: calc(40 * var(--u));
+  border-radius: calc(8 * var(--u));
+  text-decoration: none;
+  color: #ffffff;
+  border-bottom: calc(1 * var(--u)) solid #262626;
+  transition: color 0.15s ease, scale 0.2s ease-out;
+}
+
+.hm-contact-list li:last-child .hm-contact-row {
+  border-bottom: 0;
+}
+
+.hm-contact-icon {
+  width: calc(20 * var(--u));
+  height: calc(20 * var(--u));
+  fill: #8a8a8a;
+  transition: fill 0.15s ease;
+}
+
+.hm-contact-label {
+  font: 700 calc(11.5 * var(--u)) / 1 'MartianMono', monospace;
+  letter-spacing: calc(0.5 * var(--u));
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
+.hm-contact-value {
+  font: 500 calc(17 * var(--u)) / 1.2 'Inter', sans-serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hm-contact-go {
+  width: calc(18 * var(--u));
+  height: calc(18 * var(--u));
+  color: #5a5a5a;
+  transition: color 0.15s ease, translate 0.2s ease;
+}
+
+.hm-contact-row:focus-visible .hm-contact-value,
+.hm-contact-row:focus-visible .hm-contact-go {
+  color: #ff4a4a;
+}
+
+@media (hover: hover) {
+  .hm-contact-row:hover .hm-contact-value,
+  .hm-contact-row:hover .hm-contact-go {
+    color: #ff4a4a;
+  }
+
+  .hm-contact-row:hover .hm-contact-icon {
+    fill: #ffffff;
+  }
+
+  .hm-contact-row:hover .hm-contact-go {
+    translate: calc(2 * var(--u)) calc(-2 * var(--u));
+  }
+}
 
 .hm-social {
   display: grid;
   place-items: center;
   text-decoration: none;
-  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease;
+  transition:
+    transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+    border-color 0.15s ease,
+    scale 0.2s ease-out;
 }
 
-.hm-social:hover {
-  transform: translateY(calc(-4 * var(--u)));
+.hm-social:focus-visible {
   border-color: var(--hm-red) !important;
+}
+
+@media (hover: hover) {
+  .hm-social:hover {
+    transform: translateY(calc(-4 * var(--u)));
+    border-color: var(--hm-red) !important;
+  }
 }
 
 .hm-social-tile {
@@ -538,12 +963,243 @@ html {
   cursor: default;
 }
 
-.hm-social--empty:hover {
-  transform: none;
-  border-color: var(--hm-bezel) !important;
+@media (hover: hover) {
+  .hm-social--empty:hover {
+    transform: none;
+    border-color: var(--hm-bezel) !important;
+  }
+}
+
+/* ---------- phone lock + contact form ---------------------- */
+
+/* the locked phone row is a button that looks like its sibling rows */
+button.hm-contact-row {
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-bottom: calc(1 * var(--u)) solid #262626;
+  background: none;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.hm-contact-row--locked .hm-contact-value {
+  color: #8a8a8a;
+  font-style: normal;
+}
+
+.hm-contact-row--locked .hm-contact-go {
+  fill: #8a8a8a;
+}
+
+@media (hover: hover) {
+  .hm-contact-row--locked:hover .hm-contact-go {
+    translate: none;
+  }
+}
+
+/* the locked phone socket: the tile, with a small lock badge on its corner */
+button.hm-social {
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.hm-social-lock {
+  position: absolute;
+  right: calc(-6 * var(--u));
+  bottom: calc(-6 * var(--u));
+  display: grid;
+  place-items: center;
+  width: calc(20 * var(--u));
+  height: calc(20 * var(--u));
+  border-radius: 50%;
+  background: var(--hm-red);
+  box-shadow: 0 0 0 calc(2 * var(--u)) #000000;
+}
+
+.hm-social-lock svg {
+  width: 60%;
+  height: 60%;
+  fill: #ffffff;
+}
+
+/* The dialog lives inside the frame, so it is sized in design units; it
+   inherits the section's pointer-events: none, so it takes them back. */
+.hm-cform {
+  pointer-events: auto;
+  width: calc(460 * var(--u));
+  max-width: calc(100vw - 32px);
+  margin: auto;
+  padding: calc(36 * var(--u)) calc(36 * var(--u)) calc(32 * var(--u));
+  border: 0;
+  border-radius: calc(24 * var(--u));
+  background: var(--hm-inset);
+  color: #ffffff;
+  box-shadow:
+    0 0 0 calc(2 * var(--u)) #000000,
+    0 0 0 calc(7 * var(--u)) var(--hm-edge),
+    0 calc(30 * var(--u)) calc(80 * var(--u)) rgba(0, 0, 0, 0.7);
+  overflow: visible;
+}
+
+.hm-cform::backdrop {
+  background: rgba(0, 0, 0, 0.78);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hm-cform[open] {
+    animation: hm-cform-pop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+@keyframes hm-cform-pop {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+}
+
+.hm-cform-title {
+  margin: 0;
+  font: 400 calc(26 * var(--u)) / 1.2 'Azonix', sans-serif;
+  text-transform: uppercase;
+}
+
+.hm-cform-lede {
+  margin: calc(10 * var(--u)) 0 calc(22 * var(--u));
+  font: 400 calc(15 * var(--u)) / 1.5 'Inter', sans-serif;
+  color: #b8b8b8;
+  text-wrap: pretty;
+}
+
+.hm-cform-field {
+  display: flex;
+  flex-direction: column;
+  gap: calc(6 * var(--u));
+  margin-bottom: calc(14 * var(--u));
+}
+
+.hm-cform-field label {
+  font: 700 calc(11.5 * var(--u)) / 1 'MartianMono', monospace;
+  letter-spacing: calc(0.5 * var(--u));
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
+.hm-cform-field input,
+.hm-cform-field textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: calc(11 * var(--u)) calc(14 * var(--u));
+  border: calc(1.5 * var(--u)) solid var(--hm-edge);
+  border-radius: calc(10 * var(--u));
+  background: #111111;
+  color: #ffffff;
+  font: 400 calc(16 * var(--u)) / 1.4 'Inter', sans-serif;
+  resize: vertical;
+  transition: border-color 0.15s ease;
+}
+
+.hm-cform-field input:focus-visible,
+.hm-cform-field textarea:focus-visible {
+  outline: none;
+  border-color: #8a8a8a;
+}
+
+/* invalid stays red while focused, until the field is corrected */
+.hm-cform-field [aria-invalid="true"],
+.hm-cform-field [aria-invalid="true"]:focus-visible {
+  border-color: #ff4a4a;
+}
+
+.hm-cform-error,
+.hm-cform-failed {
+  font: 400 calc(13 * var(--u)) / 1.4 'Inter', sans-serif;
+  color: #ff6b6b;
+}
+
+.hm-cform-failed {
+  margin: 0 0 calc(12 * var(--u));
+}
+
+.hm-cform-failed a {
+  color: #ffffff;
+}
+
+.hm-cform-honey {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.hm-cform-submit {
+  width: 100%;
+  margin-top: calc(6 * var(--u));
+  padding: calc(14 * var(--u));
+  border: 0;
+  border-radius: 9999px;
+  background: #ffffff;
+  color: #000000;
+  font: 600 calc(15 * var(--u)) / 1 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: calc(0.5 * var(--u));
+  cursor: pointer;
+  transition: background-color 0.15s ease, scale 0.2s ease-out;
+}
+
+.hm-cform-submit:disabled {
+  background: #8a8a8a;
+  cursor: progress;
+}
+
+@media (hover: hover) {
+  .hm-cform-submit:not(:disabled):hover {
+    background: #e6e6e6;
+  }
+}
+
+.hm-cform-phone {
+  display: block;
+  margin-bottom: calc(18 * var(--u));
+  font: 500 calc(30 * var(--u)) / 1.2 'Inter', sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: #ffffff;
+  text-decoration: none;
+}
+
+.hm-cform-close {
+  position: absolute;
+  top: calc(-16 * var(--u));
+  right: calc(-16 * var(--u));
+  width: calc(44 * var(--u));
+  height: calc(44 * var(--u));
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  background: #1c1c1c;
+  color: #ffffff;
+  box-shadow:
+    0 0 0 calc(2 * var(--u)) #000000,
+    0 0 0 calc(5 * var(--u)) #515051;
+  cursor: pointer;
+  transition: scale 0.2s ease-out;
+}
+
+.hm-cform-close svg {
+  width: 45%;
+  height: 45%;
 }
 
 /* ---------- reduced motion ---------------------------------- */
+
+/* Backstop. The big movers above are already opt-in; this catches small
+   hover transitions and anything added later that forgot its guard. */
 
 @media (prefers-reduced-motion: reduce) {
   .hm-root *,

@@ -148,39 +148,21 @@
   width: calc(607 * var(--u));
   height: calc(607 * var(--u));
   translate: -50% 0;
-  animation:
-    pl-mark-boot 1.5s cubic-bezier(0.16, 1, 0.3, 1) both,
-    pl-mark-hover 6s ease-in-out 1.2s infinite;
 }
 
-.pl-mark-img {
+.pl-mark-img,
+.pl-ascii,
+.pl-particles {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: contain;
   user-select: none;
+}
+
+.pl-mark-img {
+  object-fit: contain;
   filter: drop-shadow(0 calc(16 * var(--u)) calc(26 * var(--u)) rgba(0, 0, 0, 0.55));
-}
-
-/* red sweep, clipped to the silhouette by the logo's own alpha */
-.pl-mark-scan {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
-  pointer-events: none;
-  -webkit-mask: var(--mark) center / contain no-repeat;
-  mask: var(--mark) center / contain no-repeat;
-}
-
-.pl-mark-beam {
-  position: absolute;
-  left: -10%;
-  right: -10%;
-  height: 26%;
-  background: linear-gradient(180deg, transparent 0%, rgba(255, 26, 26, 0.7) 46%, rgba(255, 140, 140, 0.9) 53%, transparent 100%);
-  filter: blur(calc(3 * var(--u)));
-  animation: pl-sweep 4.2s cubic-bezier(0.65, 0, 0.35, 1) infinite;
 }
 
 /* ---------- console: status line + progress rail ------------ */
@@ -322,31 +304,45 @@
   animation: pl-drop 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
 }
 
+/* The display takes the module's width beside the knob: 200 less the 3.48
+   border and 6 padding each side leaves 181 — 145 of display, a 6 gap, the
+   30 knob. */
 .pl-display {
   display: grid;
   place-items: center;
-  width: calc(93 * var(--u));
+  width: calc(145 * var(--u));
   height: calc(30 * var(--u));
   border-radius: calc(5 * var(--u));
   overflow: hidden;
+  /* a faint red cast, as an LED panel's smoked lens has */
+  background-image: radial-gradient(ellipse at 50% 60%, rgba(255, 0, 0, 0.07), transparent 70%);
 }
 
-.pl-time {
-  font-family: var(--pl-lcd);
-  font-size: clamp(12px, calc(17 * var(--u)), 19px);
-  line-height: 1;
-  letter-spacing: 0.01em;
-  color: var(--pl-red);
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 calc(10 * var(--u)) rgba(255, 0, 0, 0.75);
-  white-space: nowrap;
+.pl-seg-clock {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
-.pl-time i {
-  font-style: normal;
-  padding: 0 calc(5 * var(--u));
-  /* pulses like an LED clock instead of vanishing outright */
-  animation: pl-blink-soft 2s ease-in-out infinite;
+/* unlit segments stay faintly visible — the ghost 8s of an LED panel */
+.pl-seg {
+  fill: rgba(255, 0, 0, 0.08);
+}
+
+.pl-seg--on {
+  fill: #ff2a2a;
+  filter: drop-shadow(0 0 1.6px rgba(255, 0, 0, 0.85));
+}
+
+.pl-seg-ampm {
+  font: 700 6.4px / 1 var(--pl-mono);
+  letter-spacing: 0.3px;
+  fill: rgba(255, 0, 0, 0.14);
+}
+
+.pl-seg-ampm--on {
+  fill: #ff2a2a;
+  filter: drop-shadow(0 0 1.4px rgba(255, 0, 0, 0.8));
 }
 
 .pl-knob {
@@ -438,59 +434,6 @@
 }
 
 /* ---------- keyframes -------------------------------------- */
-
-@keyframes pl-mark-boot {
-  0% {
-    opacity: 0;
-    scale: 1.06;
-    filter: blur(calc(10 * var(--u)));
-  }
-  22% {
-    opacity: 0.85;
-  }
-  26% {
-    opacity: 0.15;
-  }
-  32% {
-    opacity: 0.95;
-  }
-  38% {
-    opacity: 0.35;
-  }
-  100% {
-    opacity: 1;
-    scale: 1;
-    filter: blur(0);
-  }
-}
-
-@keyframes pl-mark-hover {
-  0%,
-  100% {
-    transform: translateY(calc(-7 * var(--u)));
-  }
-  50% {
-    transform: translateY(calc(7 * var(--u)));
-  }
-}
-
-@keyframes pl-sweep {
-  0% {
-    top: -30%;
-    opacity: 0;
-  }
-  8% {
-    opacity: 1;
-  }
-  48% {
-    opacity: 1;
-  }
-  58%,
-  100% {
-    top: 112%;
-    opacity: 0;
-  }
-}
 
 @keyframes pl-drift {
   from {

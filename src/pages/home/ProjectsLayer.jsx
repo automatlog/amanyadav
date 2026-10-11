@@ -8,7 +8,7 @@ import zophuLogo from '../../images/collab-png/zophu-white.png'
 import evaraLinktree from '../../images/projects-img/Evara Linktree.png'
 import liveIndia from '../../images/projects-img/liveliferehabindia.png'
 import raheebSite from '../../images/projects-img/raheeb perfumes.png'
-import { Box, RBox, Torx, border, type, u } from './canvas'
+import { Box, RBox, Stroked, Torx, border, roundedPath, type, u } from './canvas'
 
 /**
  * Projects — Figma group "projects", 1340 x 831.5. Group-relative coordinates.
@@ -27,7 +27,7 @@ const WORKS = [
   { key: 'zophu', name: 'Zophu', logo: zophuLogo },
   { key: 'liveliferehab', name: 'Live Life Rehab', logo: liveliferehabLogo, shot: liveIndia },
   { key: 'evara', name: 'Evara', logo: evaraLogo, shot: evaraLinktree, portrait: evaraLinktree },
-  { key: 'raheeb', name: "Raheeb's Perfumes", logo: raheebLogo, shot: raheebSite },
+  { key: 'raheeb', name: 'Raheeb’s Perfumes', logo: raheebLogo, shot: raheebSite },
 ]
 
 const SLIDE_MS = 5200
@@ -108,72 +108,99 @@ function BrandCard({ work }) {
   )
 }
 
+/* Rectangle 39419 — the ribbon — and Rectangle 39417, the connector plate it
+   runs into. */
+const RIBBON = { x: 0, y: 10.98, w: 308.07, h: 21.04 }
+const PLATE = { x: 285.02, y: 0, w: 51.99, h: 5.99, deg: -54.7 }
+
+/**
+ * The ribbon ends flush against the plate's left face, so each wire stops
+ * where it meets the plate: the top wire runs furthest, each one below stops
+ * a little sooner. In the reference the four wire ends sit on one line at
+ * 54.8deg, and the plate's face projected down to each wire row lands on its
+ * end to within half a pixel (329.6/330, 316.8/317, 304.1/304, 290.0/289.5).
+ *
+ * Squared off at 308.07, the ribbon ran on past that face — up to ~16 of
+ * wire visible beyond the plate along its lower rows.
+ *
+ * The face comes straight from the plate's export values: its centre is the
+ * rotated-origin box's centre, and its left face sits half its thickness
+ * along the rotated normal. Returned as a clip-path in the ribbon's own box.
+ */
+const RIBBON_CUT = (() => {
+  const r = (Math.abs(PLATE.deg) * Math.PI) / 180
+  const cos = Math.cos(r)
+  const sin = Math.sin(r)
+  const cx = PLATE.x + (PLATE.w * cos + PLATE.h * sin) / 2
+  const cy = PLATE.y + (PLATE.w * sin + PLATE.h * cos) / 2
+  // rotate(-deg) maps the box's y axis (its thickness) to (sin, cos)
+  const fx = cx - (PLATE.h / 2) * sin
+  const fy = cy - (PLATE.h / 2) * cos
+  const xAt = (y) => fx + ((y - fy) * cos) / -sin
+  const pct = (x) => `${(((x - RIBBON.x) / RIBBON.w) * 100).toFixed(3)}%`
+  return `polygon(0 0, ${pct(xAt(RIBBON.y))} 0, ${pct(xAt(RIBBON.y + RIBBON.h))} 100%, 0 100%)`
+})()
+
+/* The ribbon's face. The reference reads the same in every column:
+   a #2A2A2A band carrying four #515051 wires, centred 3.41 / 7.89 / 12.38 /
+   17.48 below its top, the second one thicker (1.8 against ~1.0). Hard
+   stops in design units, so the wires stay crisp at every scale. */
+const RIBBON_WIRES = (() => {
+  const wires = [
+    [3.41, 1.0],
+    [7.89, 1.8],
+    [12.38, 1.0],
+    [17.48, 1.1],
+  ]
+  const stops = wires.flatMap(([c, w]) => {
+    const a = u(c - w / 2)
+    const b = u(c + w / 2)
+    return [`transparent ${a}`, `#515051 ${a}`, `#515051 ${b}`, `transparent ${b}`]
+  })
+  return `linear-gradient(180deg, transparent 0, ${stops.join(', ')}, transparent 100%)`
+})()
+
 /* ---- Rectangle 39363, the display housing ------------------------------ */
 
 const HOUSE = { x: 101.97, y: 2, w: 1238.03, h: 686.99 }
-const HOUSE_TOP = 77.97
+/* Re-traced from a 2.45x reference (scale pinned on the speaker capsule,
+   cross-checked on the ribbon to 0.1-0.5). The earlier, coarser read put
+   the low edge 2.75 too low and the rising flank ~4.5 too far right:
+   - low top edge at 75.22: the 5 edge band reads 77.22..82.12 in the group
+   - rising flank 48.85deg, its OUTER edge measured row by row (the face
+     edge is no use there: the inner shadow darkens it). Foot at
+     (167.86, 75.22) with an r20 fillet — fitted to the curve, rms 0.19.
+     The right foot is outside the reference and takes the same radius
+   - apex where the flank meets the descent, (233.26, 0.40), rounded r18 —
+     fitted to the reference's crown, rms 0.18 (r12 left the shoulder 1.2
+     high)
+   - descent at 0.1918, through the same break as before to within 0.3
+   The reference stops at x~374 of the housing, so the right foot keeps the
+   second descent's slope and simply lands on the raised edge. */
+const HOUSE_TOP = 75.22
 const HOUSE_EDGE = 5
 
 /* [x, y, corner radius] around the outline, clockwise from the top-left. */
 const HOUSE_OUTLINE = [
   [0, HOUSE_TOP, 20],
-  [174.07, HOUSE_TOP, 16],
-  [238.07, 0, 12],
-  [438.02, 39.98, 12],
-  [477.99, HOUSE_TOP, 16],
+  [167.86, HOUSE_TOP, 20],
+  [233.26, 0.4, 18],
+  [438.02, 39.67, 12],
+  [475.42, HOUSE_TOP, 20],
   [HOUSE.w, HOUSE_TOP, 20],
   [HOUSE.w, HOUSE.h, 20],
   [0, HOUSE.h, 20],
 ]
 
-/**
- * Rounds every vertex of a closed polygon by the radius carried on it.
- *
- * Each corner becomes a circular arc tangent to both adjacent edges, so the
- * radius is honoured exactly rather than approximated with a curve. The sweep
- * flag comes from the sign of the turn, which is what lets the same routine
- * round the hump's two concave feet as well as its convex apex — a fillet in
- * the valleys, a fillet on the peaks. Radii are clamped to half the shorter
- * neighbouring edge so a generous corner can never overrun a short segment.
- */
-function roundedPath(pts) {
-  const n = pts.length
-  const corners = pts.map(([bx, by, r], i) => {
-    const [ax, ay] = pts[(i - 1 + n) % n]
-    const [cx, cy] = pts[(i + 1) % n]
-    const l1 = Math.hypot(ax - bx, ay - by)
-    const l2 = Math.hypot(cx - bx, cy - by)
-    const u1 = { x: (ax - bx) / l1, y: (ay - by) / l1 }
-    const u2 = { x: (cx - bx) / l2, y: (cy - by) / l2 }
-    const half = Math.acos(Math.max(-1, Math.min(1, u1.x * u2.x + u1.y * u2.y))) / 2
-    const t = Math.min(r / Math.tan(half), l1 / 2, l2 / 2)
-    return {
-      from: [bx + u1.x * t, by + u1.y * t],
-      to: [bx + u2.x * t, by + u2.y * t],
-      r: t * Math.tan(half),
-      sweep: (bx - ax) * (cy - by) - (by - ay) * (cx - bx) > 0 ? 1 : 0,
-    }
-  })
-
-  const f = (v) => v.toFixed(2)
-  const arc = (c) => `A${f(c.r)} ${f(c.r)} 0 0 ${c.sweep} ${f(c.to[0])} ${f(c.to[1])}`
-  return corners
-    .map((c, i) => (i === 0 ? `M${f(c.from[0])} ${f(c.from[1])}${arc(c)}` : `L${f(c.from[0])} ${f(c.from[1])}${arc(c)}`))
-    .concat('Z')
-    .join('')
-}
-
 const HOUSE_PATH = roundedPath(HOUSE_OUTLINE)
 
 /**
- * The face keeps the .hm-bezel recipe — #515051 with a sheen off the top and
- * a darkened foot — but as a gradient in the shape's own space, so the sheen
- * follows the hump instead of stopping at a box edge that no longer exists.
+ * Flat #515051 face, as the export and the reference both have it, with the
+ * export's inner shadow and the 5 edge painted over it.
  */
 function Housing() {
   return (
     <Box
-      style={{ filter: `drop-shadow(0 ${u(6)} ${u(18)} rgba(0,0,0,.55))` }}
       w={HOUSE.w}
       h={HOUSE.h}
       x={HOUSE.x}
@@ -181,17 +208,36 @@ function Housing() {
     >
       <svg height="100%" viewBox={`0 0 ${HOUSE.w} ${HOUSE.h}`} width="100%">
         <defs>
-          <linearGradient id="hm-house-face" x1="0" x2="0" y1="0" y2="1">
-            <stop offset="0" stopColor="#666566" />
-            <stop offset={HOUSE_TOP / HOUSE.h} stopColor="#515051" />
-            <stop offset="0.977" stopColor="#515051" />
-            <stop offset="1" stopColor="#3E3D3E" />
-          </linearGradient>
           <clipPath id="hm-house-clip">
             <path d={HOUSE_PATH} />
           </clipPath>
+          {/* The export's inset 6 4 4 rgba(0,0,0,.25), rebuilt for a path: the
+              shadow is whatever the FILL loses when shifted (6, 4), blurred
+              (CSS blur 4 = std-dev 2) and kept inside it; the 5 edge is then
+              painted over it. Measured in the reference, that is exactly the
+              split: ~1 of shadow left below a top edge (4 - 5 + blur), a
+              clear ramp inside the 48.85deg flank (6, 4 projects to 7.15). */}
+          <filter
+            colorInterpolationFilters="sRGB"
+            height="1"
+            id="hm-house-inset"
+            width="1"
+            x="0"
+            y="0"
+          >
+            <feOffset dx="6" dy="4" in="SourceAlpha" result="shifted" />
+            <feComposite in="SourceAlpha" in2="shifted" operator="out" result="rim" />
+            <feGaussianBlur in="rim" result="soft" stdDeviation="2" />
+            <feComposite in="soft" in2="SourceAlpha" operator="in" result="inside" />
+            <feFlood floodColor="#000000" floodOpacity="0.25" />
+            <feComposite in2="inside" operator="in" result="shadow" />
+            <feMerge>
+              <feMergeNode in="SourceGraphic" />
+              <feMergeNode in="shadow" />
+            </feMerge>
+          </filter>
         </defs>
-        <path d={HOUSE_PATH} fill="url(#hm-house-face)" />
+        <path d={HOUSE_PATH} fill="#515051" filter="url(#hm-house-inset)" />
         {/* stroked at twice the edge width and clipped to the shape, so the
             surviving half is exactly the 5 edge, inside the bounds */}
         <g clipPath="url(#hm-house-clip)">
@@ -219,14 +265,13 @@ function ProjectsLayer() {
     <div onMouseEnter={hold} onMouseLeave={release}>
       {/* --- Rectangle 39363 — display housing ---
           The export says "rounded rect, 1238.03 x 686.99 at (101.97, 2)".
-          The selection outline says otherwise: the top edge sits LOW at 77.97
-          across the whole width — just above the screen's 87.97 — with a
-          raised hump in the middle. y=2 is touched only at the hump's apex,
-          which is all the bounding box was ever reporting.
+          The references say otherwise: the top edge sits LOW at 75.22
+          across the whole width — just above the screen — with a raised
+          hump in the middle that the bounding box was reporting.
 
           The hump is FIVE vertices, not three: it rises steeply from
-          (174, 78) to the apex at (238, 0), falls away shallowly to
-          (438, 40), then drops harder to (478, 78).
+          (170, 75) to the apex at (235, 1), falls away shallowly to
+          (438, 40), then drops harder to (475, 75). See HOUSE_OUTLINE.
 
           It is drawn as SVG rather than clip-path because clip-path could
           not carry the two things the reference actually shows. A CSS border
@@ -241,23 +286,23 @@ function ProjectsLayer() {
 
       {/* --- Group 1437252797 — the conduit, painted AFTER the housing ---
           Rectangle 39419 is `url(.png), #2A2A2A`: an image layer over the flat
-          colour. The reference shows what that image is — a ribbon of five
-          wires, not a solid slab (21.04 tall over 5 gives a 4.21 pitch).
-          The ribbon's y 11..32 clears the housing's 83 top edge, so it lies on
-          black beside the device; the connector then meets the hump's rising
-          diagonal, which is what the cut-away corner exists to allow. */}
+          colour, which the reference shows is a ribbon of four wires (see
+          RIBBON_WIRES). It lies on black beside the device and ends flush
+          against the connector plate (see RIBBON_CUT); the connector then
+          meets the hump's rising flank. */}
       <Box
         style={{
           backgroundColor: '#2A2A2A',
-          backgroundImage: `repeating-linear-gradient(180deg, #3d3c3d 0, #3d3c3d ${u(2.1)}, #151515 ${u(2.1)}, #151515 ${u(4.21)})`,
+          backgroundImage: RIBBON_WIRES,
+          clipPath: RIBBON_CUT,
         }}
-        w={308.07}
-        h={21.04}
-        x={0}
-        y={10.98}
+        w={RIBBON.w}
+        h={RIBBON.h}
+        x={RIBBON.x}
+        y={RIBBON.y}
       />
       {/* Rectangle 39417 / 39416 — the connector head at the ribbon's end */}
-      <RBox deg={-54.7} style={{ background: '#2A2A2A' }} w={51.99} h={5.99} x={285.02} y={0} />
+      <RBox deg={PLATE.deg} style={{ background: '#2A2A2A' }} w={PLATE.w} h={PLATE.h} x={PLATE.x} y={PLATE.y} />
       <RBox deg={-54.7} r={3} style={{ background: '#2A2A2A' }} w={34.04} h={23.03} x={295.87} y={11.39} />
 
       <Box
@@ -290,20 +335,19 @@ function ProjectsLayer() {
       {/* Star 5 — same Torx family as Star 1..4 elsewhere in the frame */}
       <Torx h={13.55} w={11.66} x={351.62} y={51.05} />
 
-      {/* Rectangle 39351 / 39366 — screen, with the slide track inside it */}
-      <Box
-        r={10}
-        style={{ background: '#000000', border: border(2, '#000000'), boxSizing: 'border-box' }}
-        w={1213.91}
-        h={589.03}
-        x={114.03}
-        y={87.97}
-      />
-      <Box
+      {/* Rectangle 39351 / 39366 — screen, with the slide track inside it.
+          Both strokes are OUTSIDE (no box-sizing in the export), so the image
+          now fills the track's whole 1194.07 x 569 instead of losing 2 to the
+          border on every side. */}
+      <Stroked r={10} stroke={[2, '#000000']} style={{ background: '#000000' }} w={1213.91} h={589.03} x={114.03} y={87.97} />
+      {/* The image keeps the export's r10: the reference shows it rounded,
+          which outranks the concentric-radius rule it was squared for. */}
+      <Stroked
         aria-label={`Project showcase — ${active.name}`}
         r={10}
         role="img"
-        style={{ border: border(2, '#000000'), boxSizing: 'border-box', overflow: 'hidden' }}
+        stroke={[2, '#000000']}
+        style={{ overflow: 'hidden' }}
         w={1194.07}
         h={569}
         x={123.95}
@@ -318,9 +362,11 @@ function ProjectsLayer() {
             ),
           )}
         </div>
-      </Box>
+      </Stroked>
 
-      {/* --- Group 1437252798 — collaborator strip --- */}
+      {/* --- Group 1437252798 — collaborator strip ---
+          Its bezel (Rectangle 39363) is the one INSIDE stroke here; the bar,
+          the slots and the badge are all outside. */}
       <Box
         className="hm-bezel"
         r={20}
@@ -334,27 +380,20 @@ function ProjectsLayer() {
         x={672.95}
         y={711.51}
       />
-      <Box
-        r={10}
-        style={{ background: '#111111', border: border(2, '#000000'), boxSizing: 'border-box' }}
-        w={BAR.w}
-        h={BAR.h}
-        x={BAR.x}
-        y={BAR.y}
-      />
+      <Stroked r={10} stroke={[2, '#000000']} style={{ background: '#111111' }} w={BAR.w} h={BAR.h} x={BAR.x} y={BAR.y} />
 
       {slots.map((slot, i) => {
         const art = slot.work.portrait || slot.work.shot
         return (
-          <Box
+          <Stroked
             aria-current={slot.active ? 'true' : undefined}
             aria-label={slot.work.name}
             as="button"
-            className={`hm-work ${slot.active ? 'hm-work--active' : ''}`}
+            className={`hm-work ${slot.active ? 'hm-work--active' : 'hm-press'}`}
             key={slot.work.key}
             onClick={() => select(i)}
             r={slot.active ? 10 : DISC / 2}
-            style={{ border: border(2, '#000000'), boxSizing: 'border-box' }}
+            stroke={[2, '#000000']}
             type="button"
             w={slot.w}
             h={slot.h}
@@ -366,22 +405,23 @@ function ProjectsLayer() {
             ) : null}
             {slot.active && !art ? <BrandCard work={slot.work} /> : null}
             {!slot.active ? <img alt="" className="hm-work-logo" draggable={false} src={slot.work.logo} /> : null}
-          </Box>
+          </Stroked>
         )
       })}
 
       {/* Rectangle 39368/39376 — the active client's logo, badged on the card */}
-      <Box
+      <Stroked
         className="hm-work-badge"
         r="full"
-        style={{ background: '#111111', border: border(2, '#000000'), boxSizing: 'border-box' }}
+        stroke={[2, '#000000']}
+        style={{ background: '#111111' }}
         w={BADGE.size}
         h={BADGE.size}
         x={slots[index].x + BADGE.dx}
         y={slots[index].y + BADGE.dy}
       >
         <img alt="" draggable={false} src={active.logo} />
-      </Box>
+      </Stroked>
     </div>
   )
 }

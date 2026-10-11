@@ -1,0 +1,389 @@
+/* ============================================================
+   WHO@Mi — built on the home frame: .hm-root supplies --u (one design
+   pixel) and the column rhythm; everything here is in design units.
+   ============================================================ */
+
+/* the page flows on past its first screen, so no fixed frame height */
+.wm-root {
+  padding-bottom: calc(160 * var(--u));
+}
+
+.wm-sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- back pill -------------------------------------- */
+
+.wm-back {
+  display: block;
+  border-radius: 9999px;
+  text-decoration: none;
+}
+
+.wm-back > * {
+  pointer-events: none;
+}
+
+.wm-back-arrow {
+  transition: translate 0.2s ease;
+}
+
+@media (hover: hover) {
+  .wm-back:hover .wm-back-arrow {
+    translate: calc(-3 * var(--u)) 0;
+  }
+}
+
+/* ---------- speaking + intro ------------------------------- */
+
+.wm-speaking {
+  display: flex;
+  align-items: center;
+  gap: calc(10 * var(--u));
+  font: 700 calc(13 * var(--u)) / 1 'MartianMono', monospace;
+  letter-spacing: calc(1.5 * var(--u));
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
+.wm-speaking-orb {
+  position: relative;
+  width: calc(28 * var(--u));
+  height: calc(28 * var(--u));
+  flex: none;
+}
+
+/* the library sizes its canvas inline; restate it in design units */
+.wm-speaking-orb canvas {
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.wm-captions p.wm-caption {
+  margin: 0 0 calc(12 * var(--u));
+  font: 400 calc(19 * var(--u)) / 1.42 'Inter', sans-serif;
+  text-wrap: pretty;
+  transition: color 0.4s ease;
+}
+
+/* lines already said step back so the one being said leads */
+.wm-caption--said {
+  color: #8a8a8a;
+}
+
+.wm-caption--saying {
+  color: #ffffff;
+}
+
+/* once the intro is finished, all of it reads at full strength */
+.wm-caption--done {
+  color: #e6e6e6;
+}
+
+/* the rest of a line is laid out but not shown — the paragraph is its final
+   size from the first character, so nothing below it moves while typing */
+.wm-caption-rest {
+  visibility: hidden;
+}
+
+.wm-caret {
+  display: inline-block;
+  width: calc(3 * var(--u));
+  height: 1em;
+  margin: 0 calc(2 * var(--u)) 0 calc(1 * var(--u));
+  vertical-align: calc(-3 * var(--u));
+  background: var(--hm-red);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wm-caret {
+    animation: wm-blink 1s steps(1, end) infinite;
+  }
+}
+
+@keyframes wm-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* ---------- collection panels ------------------------------ */
+
+/* The wireframe's lower panel: full grid width (100..1340), title bar 55.5
+   in and 39 down, a 62-tall title line and a 62-tall label line below it. */
+.wm-panel {
+  position: relative;
+  box-sizing: border-box;
+  width: calc(1240 * var(--u));
+  padding: calc(39 * var(--u)) calc(55.5 * var(--u)) calc(56 * var(--u));
+  border-radius: calc(25 * var(--u));
+  background: var(--hm-inset);
+  /* outside strokes, as the site's panels have them: 2 black, then 5 edge */
+  box-shadow:
+    0 0 0 calc(2 * var(--u)) #000000,
+    0 0 0 calc(7 * var(--u)) var(--hm-edge),
+    inset 0 calc(3 * var(--u)) calc(10 * var(--u)) rgba(0, 0, 0, 0.85);
+  scroll-margin-top: calc(80 * var(--u));
+}
+
+.wm-panel-head {
+  margin-bottom: calc(40 * var(--u));
+}
+
+.wm-panel-title {
+  margin: 0;
+  font: 400 calc(44 * var(--u)) / calc(62 * var(--u)) 'Azonix', sans-serif;
+  text-transform: uppercase;
+  color: #ffffff;
+}
+
+.wm-panel-meta {
+  margin: calc(33 * var(--u)) 0 0;
+  font: 700 calc(15 * var(--u)) / calc(22 * var(--u)) 'MartianMono', monospace;
+  letter-spacing: calc(1.5 * var(--u));
+  text-transform: uppercase;
+  color: #8a8a8a;
+}
+
+.wm-empty {
+  margin: 0;
+  padding: calc(28 * var(--u)) calc(32 * var(--u));
+  border: calc(2 * var(--u)) dashed var(--hm-edge);
+  border-radius: calc(16 * var(--u));
+  font: 400 calc(18 * var(--u)) / 1.5 'Inter', sans-serif;
+  color: #8a8a8a;
+}
+
+.wm-empty code {
+  font: 700 calc(15 * var(--u)) / 1 'MartianMono', monospace;
+  color: #d6d6d6;
+}
+
+/* ---------- tiles ------------------------------------------ */
+
+.wm-grid {
+  display: grid;
+  gap: calc(40 * var(--u)) calc(32 * var(--u));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.wm-panel--lanyards .wm-grid {
+  grid-template-columns: repeat(4, 1fr);
+  padding-top: calc(36 * var(--u));
+}
+
+.wm-panel--certificates .wm-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.wm-panel--badges .wm-grid {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.wm-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: calc(14 * var(--u));
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: zoom-in;
+  border-radius: calc(14 * var(--u));
+  transition: scale 0.2s ease-out;
+}
+
+.wm-tile-plate {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: calc(14 * var(--u));
+  background: #111111;
+  box-shadow: 0 0 0 calc(2 * var(--u)) #000000;
+  transition: box-shadow 0.15s ease;
+}
+
+.wm-tile-plate img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  outline: 1px solid rgba(255, 255, 255, 0.08);
+  outline-offset: -1px;
+}
+
+.wm-panel--lanyards .wm-tile-plate {
+  aspect-ratio: 3 / 4;
+}
+
+.wm-panel--lanyards .wm-tile-plate img {
+  object-fit: cover;
+}
+
+.wm-panel--certificates .wm-tile-plate {
+  aspect-ratio: 3 / 2;
+}
+
+.wm-panel--certificates .wm-tile-plate img,
+.wm-panel--badges .wm-tile-plate img {
+  object-fit: contain;
+  padding: calc(10 * var(--u));
+  box-sizing: border-box;
+}
+
+.wm-panel--badges .wm-tile-plate {
+  aspect-ratio: 1;
+}
+
+.wm-tile-caption {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font: 500 calc(15 * var(--u)) / 1.4 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: calc(0.5 * var(--u));
+  text-wrap: balance;
+  color: #d6d6d6;
+}
+
+/* a lanyard hangs from its strap; the strap is where it swings from */
+.wm-strap {
+  position: absolute;
+  left: 50%;
+  top: calc(-36 * var(--u));
+  width: calc(26 * var(--u));
+  height: calc(40 * var(--u));
+  translate: -50% 0;
+  border-radius: calc(4 * var(--u)) calc(4 * var(--u)) calc(6 * var(--u)) calc(6 * var(--u));
+  background:
+    linear-gradient(#515051, #515051) center bottom / calc(14 * var(--u)) calc(12 * var(--u)) no-repeat,
+    var(--hm-edge);
+}
+
+.wm-panel--lanyards .wm-tile {
+  transform-origin: 50% calc(-36 * var(--u));
+}
+
+@media (hover: hover) {
+  .wm-tile:hover .wm-tile-plate {
+    box-shadow:
+      0 0 0 calc(2 * var(--u)) #000000,
+      0 0 0 calc(4 * var(--u)) var(--hm-bezel);
+  }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .wm-panel--lanyards .wm-tile {
+    transition: rotate 0.5s cubic-bezier(0.16, 1, 0.3, 1), scale 0.2s ease-out;
+  }
+
+  .wm-panel--lanyards .wm-tile:hover {
+    rotate: -2deg;
+  }
+}
+
+/* ---------- lightbox ---------------------------------------- */
+/* Lives outside the frame, so it is sized in viewport units, not --u. */
+
+.wm-lightbox {
+  /* the browser centres a modal dialog with margin: auto; Tailwind's reset
+     zeroes every margin, which pinned it to the top-left corner */
+  margin: auto;
+  max-width: min(92vw, 1100px);
+  max-height: 92vh;
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: #111111;
+  color: #ffffff;
+  box-shadow:
+    0 0 0 2px #000000,
+    0 0 0 7px #2a2a2a,
+    0 30px 80px rgba(0, 0, 0, 0.7);
+  overflow: visible;
+}
+
+.wm-lightbox::backdrop {
+  background: rgba(0, 0, 0, 0.82);
+}
+
+.wm-lightbox figure {
+  margin: 0;
+  padding: 20px;
+}
+
+.wm-lightbox img {
+  display: block;
+  max-width: 100%;
+  max-height: calc(92vh - 110px);
+  margin: 0 auto;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.wm-lightbox figcaption {
+  margin-top: 14px;
+  font: 500 16px / 1.4 'Inter', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  text-wrap: balance;
+  text-align: center;
+  color: #d6d6d6;
+}
+
+.wm-lightbox-close {
+  position: absolute;
+  top: -18px;
+  right: -18px;
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 9999px;
+  background: #1c1c1c;
+  color: #ffffff;
+  box-shadow:
+    0 0 0 2px #000000,
+    0 0 0 6px #515051;
+  cursor: pointer;
+  transition: scale 0.2s ease-out;
+}
+
+.wm-lightbox-close svg {
+  width: 20px;
+  height: 20px;
+}
+
+.wm-lightbox-close:focus-visible {
+  outline: 2px solid #ff0000;
+  outline-offset: 6px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wm-lightbox[open] {
+    animation: wm-pop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+@keyframes wm-pop {
+  from {
+    opacity: 0;
+    scale: 0.96;
+  }
+}

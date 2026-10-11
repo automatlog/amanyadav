@@ -3,21 +3,24 @@
 // and the public github.com/automatlog account. Entries marked EDIT are drafts — correct them freely.
 
 // Nav mirrors the Figma design (node 1:350) — 5 items, no BLOG.
-// Labels carry exact display casing (WHO@Mi has a lowercase i, per Figma 1:353).
+// Labels are written in normal case and uppercased in CSS. WHO@Mi is the
+// exception — a stylised mark with a deliberate lowercase i (Figma 1:353) —
+// so it sets `caps: false` and renders exactly as written.
 export const homeNavItems = [
-  { label: 'WHO@Mi', target: 'whoami' },
-  { label: 'SKILL', target: 'skill' },
-  { label: 'EXPERIENCE', target: 'experience' },
-  { label: 'PROJECTS', target: 'projects' },
-  { label: 'CONTACT', target: 'contact' },
+  { label: 'WHO@Mi', target: 'whoami', caps: false },
+  { label: 'Skills', target: 'skills' },
+  { label: 'Experience', target: 'experience' },
+  { label: 'Projects', target: 'projects' },
+  { label: 'Contact', target: 'contact' },
 ]
 
+// From the header of public/Aman Yadav — Resume.pdf. The phone is not here:
+// it is unlocked by the contact form (data/contactForm.js).
 export const contactInfo = {
   email: 'automatlog@gmail.com',
-  phone: '+91 9428587817',
   github: 'https://github.com/automatlog',
-  // EDIT: paste your LinkedIn profile URL to show the LinkedIn button on the contact section.
-  linkedin: '',
+  linkedin: 'https://www.linkedin.com/in/amandkyadav',
+  tryhackme: 'https://tryhackme.com/p/Automatlog',
 }
 
 export const heroContent = {

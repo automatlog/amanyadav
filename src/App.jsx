@@ -6,10 +6,12 @@ import DesktopGate from './components/DesktopGate'
 import Preloader from './components/preloader/Preloader'
 import { useIsMobileViewport } from './hooks/useIsMobileViewport'
 import HomePage from './pages/HomePage'
+import { introAfterPreloader } from './pages/home/intro'
 
 const ProjectsIndexPage = lazy(() => import('./pages/ProjectsIndexPage'))
 const ProjectDetailPage = lazy(() => import('./pages/ProjectDetailPage'))
 const AchievementsPage = lazy(() => import('./pages/AchievementsPage'))
+const WhoamiPage = lazy(() => import('./pages/WhoamiPage'))
 
 function AppRoutes() {
   const location = useLocation()
@@ -22,6 +24,7 @@ function AppRoutes() {
             <Route element={<ProjectsIndexPage />} path="projects" />
             <Route element={<ProjectDetailPage />} path="projects/:slug" />
             <Route element={<AchievementsPage />} path="achievements" />
+            <Route element={<WhoamiPage />} path="whoami" />
           </Route>
           <Route element={<Navigate replace to="/" />} path="*" />
         </Routes>
@@ -63,6 +66,7 @@ function App() {
     } catch {
       // Storage unavailable — the preloader simply replays next visit.
     }
+    introAfterPreloader()
     setIsReady(true)
   }, [])
 

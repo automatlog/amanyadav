@@ -2,28 +2,37 @@
     font-family: "Inter";
     font-weight: 400;
     font-display: swap;
-    src: url("./Inter-Regular.ttf");
+    src: url("./Inter-Regular.woff2") format("woff2");
 }
 
 @font-face {
     font-family: "Inter";
     font-weight: 500;
     font-display: swap;
-    src: url("./Inter-Medium.ttf");
+    src: url("./Inter-Medium.woff2") format("woff2");
 }
 
+/* Azonix ships two disagreeing sets of vertical metrics (hhea 751/257, win
+   789/183) and does not set USE_TYPO_METRICS, so Chrome on Windows lays it
+   out with the win set while Figma — and Chrome on macOS — use hhea. On
+   Windows every Azonix line therefore sat ~5.6% of its size too low: 5.8
+   design px on the 94px card name, measured against the reference. These
+   overrides pin the hhea values on every platform. */
 @font-face {
     font-family: "Azonix";
     font-weight: 400;
     font-display: swap;
-    src: url("./Azonix.otf");
+    src: url("./Azonix.woff2") format("woff2");
+    ascent-override: 75.1%;
+    descent-override: 25.7%;
+    line-gap-override: 0%;
 }
 
 @font-face {
     font-family: "Bruno Ace";
     font-weight: 400;
     font-display: swap;
-    src: url("./BrunoAce-Regular.ttf");
+    src: url("./BrunoAce-Regular.woff2") format("woff2");
 }
 
 /* Only the Bold cut ships — map both weights to it so the browser never
@@ -32,26 +41,26 @@
     font-family: "MartianMono";
     font-weight: 400;
     font-display: swap;
-    src: url("./MartianMono-Bold.ttf");
+    src: url("./MartianMono-Bold.woff2") format("woff2");
 }
 
 @font-face {
     font-family: "MartianMono";
     font-weight: 700;
     font-display: swap;
-    src: url("./MartianMono-Bold.ttf");
+    src: url("./MartianMono-Bold.woff2") format("woff2");
 }
 
 @font-face {
     font-family: "Ubuntu";
     font-weight: 400;
     font-display: swap;
-    src: url("./Ubuntu-Regular.ttf");
+    src: url("./Ubuntu-Regular.woff2") format("woff2");
 }
 
 @font-face {
     font-family: "Ubuntu";
     font-weight: 500;
     font-display: swap;
-    src: url("./Ubuntu-Medium.ttf");
+    src: url("./Ubuntu-Medium.woff2") format("woff2");
 }

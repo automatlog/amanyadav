@@ -10,7 +10,7 @@ function SocialLinks({ className = '', iconClassName = '', tone = 'muted' }) {
 
   return (
     <ul className={`flex flex-wrap items-center gap-2.5 ${className}`}>
-      {socialLinks.map((link) => {
+      {socialLinks.filter((link) => !link.locked).map((link) => {
         const active = Boolean(link.href)
         const external = isExternal(link.href)
         const common = `flex h-11 w-11 items-center justify-center rounded-[10px] border transition-colors ${iconClassName}`

@@ -1,7 +1,9 @@
 /* eslint-disable react/prop-types */
 import { motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useState } from 'react'
 import skullMark from '../../assets/obsidian_skull.png'
+import AsciiMark from './AsciiMark'
+import SegmentClock from './SegmentClock'
+import HeadParticles from './HeadParticles'
 import { usePreloadProgress } from './usePreloadProgress'
 import './preloader.css'
 
@@ -24,24 +26,12 @@ function phaseFor(progress) {
   return current
 }
 
-function useClock() {
-  const [time, setTime] = useState(() => new Date())
-
-  useEffect(() => {
-    const id = setInterval(() => setTime(new Date()), 15000)
-    return () => clearInterval(id)
-  }, [])
-
-  // 12-hour, matching the "12 : 00" readout in the design
-  return {
-    hours: String(time.getHours() % 12 || 12).padStart(2, '0'),
-    minutes: String(time.getMinutes()).padStart(2, '0'),
-  }
-}
-
-function Preloader({ onFinish, minDuration = 2200 }) {
-  const progress = usePreloadProgress({ minDuration, onFinish })
-  const { hours, minutes } = useClock()
+/* `progressOverride` lets the preview harness drive the screen at its own
+   pace; the real app never passes it, and while it is set the real loader
+   cannot finish. */
+function Preloader({ onFinish, minDuration = 2200, progressOverride }) {
+  const auto = usePreloadProgress({ minDuration, onFinish: progressOverride === undefined ? onFinish : undefined })
+  const progress = progressOverride ?? auto
   const reduceMotion = useReducedMotion()
 
   const rounded = Math.round(progress)
@@ -82,22 +72,20 @@ function Preloader({ onFinish, minDuration = 2200 }) {
         <span className="pl-tick pl-tick--br" />
       </div>
 
-      {/* --- the mark --- */}
+      {/* --- the mark: kept minimal. No sweep, no flicker, no float — it
+          assembles from ASCII as the site loads and resolves into the clean
+          logo (see AsciiMark), over a particle field shaped like the whole
+          head that jiggles and pulses while it thinks (see HeadParticles).
+          The particles leave with the ASCII as the clean logo arrives. --- */}
       <div className="pl-mark">
-        <img alt="" className="pl-mark-img" draggable={false} src={skullMark} />
-        <div aria-hidden className="pl-mark-scan" style={{ '--mark': `url(${skullMark})` }}>
-          <span className="pl-mark-beam" />
-        </div>
+        <HeadParticles opacity={1 - Math.min(1, Math.max(0, (progress - 93) / 7))} reduce={reduceMotion} src={skullMark} />
+        <AsciiMark progress={progress} reduce={reduceMotion} src={skullMark} />
       </div>
 
       {/* --- clock module --- */}
       <div className="pl-clock pl-bezel">
         <div className="pl-display pl-inset">
-          <span className="pl-time">
-            {hours}
-            <i>:</i>
-            {minutes}
-          </span>
+          <SegmentClock reduce={reduceMotion} />
         </div>
         <div className="pl-knob pl-inset" />
       </div>

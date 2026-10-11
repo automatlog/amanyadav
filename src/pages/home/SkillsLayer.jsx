@@ -1,4 +1,4 @@
-import { Box, RBox, border, type } from './canvas'
+import { Box, RBox, Stroked, type } from './canvas'
 import { skillMarks } from './skillMarks'
 
 /**
@@ -13,6 +13,12 @@ import { skillMarks } from './skillMarks'
  * only when the track happens to be at rest; a moment later one tile is
  * half-in at each end and just five are whole. Seven pitches is the first
  * width where the count never drops below six.
+ *
+ * Both strokes are OUTSIDE (no box-sizing in the export), so RACK and PANEL
+ * are the fills. That puts the panel's stroke 7 inside the rack's fill edge
+ * (the export's 6.95) and the conduit stubs flush against the rack's stroke,
+ * as they are in the export — and the marquee window is the panel's full
+ * 1190, exactly seven pitches, rather than 1186 after an inside border.
  */
 const RACK = { x: 118, y: 59, w: 1208, h: 200 }
 const PANEL = { x: 127, y: 69, w: 1190, h: 180 }
@@ -24,12 +30,12 @@ const SPEED = 46 /* design px per second; slow enough to read each mark */
 
 /**
  * A marquee needs its repeating run to be at least as wide as the window,
- * or a gap opens at the wrap. With five marks a single pass is 850 against
- * a 1190 window, so the run carries the list twice. Two identical runs then
+ * or a gap opens at the wrap; the run repeats the list only as often as that
+ * takes (20 marks x 170 = 3400 against a 1190 window: once). Two runs then
  * sit side by side and the track slides exactly one run per cycle, which is
  * what makes the loop seamless rather than snapping back.
  */
-const REPEAT = Math.max(2, Math.ceil(PANEL.w / (skillMarks.length * PITCH)))
+const REPEAT = Math.max(1, Math.ceil(PANEL.w / (skillMarks.length * PITCH)))
 const RUN = Array.from({ length: REPEAT }, () => skillMarks).flat()
 const DURATION = (RUN.length * PITCH) / SPEED
 
@@ -66,19 +72,11 @@ function SkillsLayer() {
       <RBox deg={0.5} style={{ background: '#2A2A2A' }} w={102.89} h={5} x={1341.11} y={LINE_Y + 5.5} />
 
       {/* Rectangle 39351 / 39352 — the rack */}
-      <Box
-        className="hm-bezel"
-        r={40}
-        style={{ border: border(5, '#2A2A2A'), boxSizing: 'border-box' }}
-        w={RACK.w}
-        h={RACK.h}
-        x={RACK.x}
-        y={RACK.y}
-      />
-      <Box
+      <Stroked className="hm-bezel" r={40} stroke={[5, '#2A2A2A']} w={RACK.w} h={RACK.h} x={RACK.x} y={RACK.y} />
+      <Stroked
         className="hm-inset-panel"
-        r={32}
-        style={{ border: border(2, '#000000'), boxSizing: 'border-box' }}
+        r={31}
+        stroke={[2, '#000000']}
         w={PANEL.w}
         h={PANEL.h}
         x={PANEL.x}
@@ -89,15 +87,16 @@ function SkillsLayer() {
             {[0, 1].map((copy) => (
               <div aria-hidden={copy === 1 || undefined} className="hm-marquee-run" key={copy}>
                 {RUN.map((skill, i) => (
-                  <div className="hm-skill" key={`${copy}-${i}-${skill.key}`} title={skill.label}>
+                  <div className="hm-skill" key={`${copy}-${i}-${skill.key}`}>
                     {skill.mark}
+                    <span className="hm-skill-label">{skill.label}</span>
                   </div>
                 ))}
               </div>
             ))}
           </div>
         </div>
-      </Box>
+      </Stroked>
     </>
   )
 }
