@@ -2,10 +2,26 @@
 // Pure data (path elements, 24x24), keyed by socialLinks[].key. Brand marks
 // come from Simple Icons (CC0) where it has them; phone and the résumé
 // document are plain pictograms drawn here.
-import { siTryhackme } from 'simple-icons'
+import { siGoogle, siTryhackme, siX } from 'simple-icons'
 
 export const socialGlyphs = {
   tryhackme: <path d={siTryhackme.path} />,
+  /* Credly's current mark, the script "C" (traced from credly.com's
+     apple-touch-icon) — Simple Icons only has the wordmark, which is
+     unreadable at tile size. */
+  credly: (
+    <path d="M17.43 1.15C17.08 1.24 16.74 1.52 16.41 2.03C16.04 2.58 15.86 2.64 15.32 2.38C14.06 1.8 13.38 1.63 12.28 1.63C10.24 1.63 8.56 2.45 7.17 4.11C5.52 6.08 4.52 8.31 4.13 10.89C3.99 11.79 3.97 12.05 3.97 13.1C3.97 19.44 7.36 23 12.33 21.89C15.23 21.25 18.42 18.36 19.71 15.22C20.03 14.45 19.86 13.83 19.26 13.53C18.58 13.19 18.08 13.47 17.4 14.59C15.39 17.88 12.94 19.37 10.41 18.87C8.5 18.49 7.41 17.2 7.08 14.92C6.91 13.76 7.03 11.65 7.34 10.21C8.09 6.77 9.81 4.59 11.95 4.36C13.21 4.23 14.13 4.65 14.34 5.46C14.45 5.89 14.35 6.63 14.03 7.72C13.7 8.83 13.71 9.29 14.07 9.74C14.55 10.36 15.45 10.45 16.02 9.93C16.36 9.62 16.54 9.22 16.8 8.17C17.18 6.65 17.87 4.92 18.56 3.75C19.12 2.81 19.21 2.4 18.95 1.89C18.65 1.31 18.02 1 17.43 1.15Z" />
+  ),
+  gdev: <path d={siGoogle.path} />,
+  x: <path d={siX.path} />,
+  /* Topmate isn't in Simple Icons: its mark (topmate.io/favicon.svg) is this
+     notched disc on a red circle, scaled here from 47x46 into 24x24. */
+  topmate: (
+    <path
+      d="M33.0038 29.6411C31.5707 31.6672 29.5206 33.1752 27.1598 33.9401C24.7989 34.705 22.254 34.6857 19.905 33.8851C17.5561 33.0844 15.5291 31.5454 14.1269 29.4978C12.7247 27.4503 12.0225 25.0041 12.1251 22.5246C12.2277 20.045 13.1296 17.6652 14.6962 15.7405C16.2627 13.8158 18.4099 12.4495 20.817 11.8456C23.224 11.2418 25.7619 11.4328 28.0515 12.3901C30.341 13.3474 32.2595 15.0197 33.5204 17.1572L23.6152 23L33.0038 29.6411Z"
+      transform="matrix(0.95 0 0 0.95 -10.434 -9.85)"
+    />
+  ),
   phone: (
     <path d="M6.6 10.8a15.1 15.1 0 0 0 6.6 6.6l2.2-2.2a1 1 0 0 1 1-.25c1.12.37 2.33.57 3.57.57a1 1 0 0 1 1 1V20a1 1 0 0 1-1 1A17 17 0 0 1 3 4a1 1 0 0 1 1-1h3.5a1 1 0 0 1 1 1c0 1.25.2 2.45.57 3.57a1 1 0 0 1-.25 1L6.6 10.8Z" />
   ),

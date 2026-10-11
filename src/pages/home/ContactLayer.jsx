@@ -13,9 +13,12 @@ import ContactForm from './ContactForm'
  */
 
 /* The contact list in the right panel — just email and phone; the profiles
-   (GitHub, LinkedIn, TryHackMe) and the résumé live in the sockets. */
+   fill the seven sockets, in this order. The résumé is on the About pill. */
 const LIST = socialLinks.filter((l) => l.key === 'email' || l.key === 'phone')
 const EMAIL = socialLinks.find((l) => l.key === 'email')
+const SOCKETS = ['github', 'linkedin', 'tryhackme', 'topmate', 'gdev', 'credly', 'x'].map((key) =>
+  socialLinks.find((l) => l.key === key),
+)
 
 const LOCK = (
   <path d="M7 10V7a5 5 0 0 1 10 0v3h1a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h1Zm2 0h6V7a3 3 0 0 0-6 0v3Z" />
@@ -90,7 +93,7 @@ const SOCKET_BORDER = 1
 const SOCKET_PAD = (SLOT - TILE) / 2
 const SOCKET_R = TILE_R + SOCKET_PAD
 
-function Socket({ x, link, unlocked, onLocked }) {
+function Socket({ x, link }) {
   const shared = {
     r: SOCKET_R,
     stroke: [SOCKET_BORDER, '#515051'],
@@ -100,34 +103,6 @@ function Socket({ x, link, unlocked, onLocked }) {
     y: SLOT_Y,
   }
   const inset = SOCKET_PAD
-
-  /* The phone, still locked: a button that opens the contact form. */
-  if (link?.locked && !unlocked) {
-    return (
-      <Stroked
-        aria-label="Phone — send a message to unlock"
-        as="button"
-        className="hm-social hm-social--locked hm-press"
-        onClick={onLocked}
-        title="Phone — send a message to unlock"
-        type="button"
-        {...shared}
-      >
-        <Box className="hm-social-tile" r={TILE_R} w={TILE} h={TILE} x={inset} y={inset}>
-          <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            {socialGlyphs[link.key]}
-          </svg>
-          <span aria-hidden className="hm-social-lock">
-            <svg viewBox="0 0 24 24">{LOCK}</svg>
-          </span>
-        </Box>
-      </Stroked>
-    )
-  }
-  if (link?.locked) {
-    const phone = revealPhone()
-    link = { ...link, href: phone.href }
-  }
 
   /* No entry for this socket — leave it empty, as the design does. */
   if (!link) {
@@ -253,7 +228,7 @@ function ContactLayer() {
       <Stroked className="hm-inset-panel" r={15} stroke={[2, '#000000']} w={649.98} h={107.01} x={5.05} y={202.99} />
 
       {SLOT_X.map((x, index) => (
-        <Socket key={x} link={socialLinks[index]} onLocked={openForm} unlocked={unlocked} x={x} />
+        <Socket key={x} link={SOCKETS[index]} x={x} />
       ))}
 
       <ContactForm

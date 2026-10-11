@@ -999,32 +999,6 @@ button.hm-contact-row {
   }
 }
 
-/* the locked phone socket: the tile, with a small lock badge on its corner */
-button.hm-social {
-  padding: 0;
-  background: none;
-  cursor: pointer;
-}
-
-.hm-social-lock {
-  position: absolute;
-  right: calc(-6 * var(--u));
-  bottom: calc(-6 * var(--u));
-  display: grid;
-  place-items: center;
-  width: calc(20 * var(--u));
-  height: calc(20 * var(--u));
-  border-radius: 50%;
-  background: var(--hm-red);
-  box-shadow: 0 0 0 calc(2 * var(--u)) #000000;
-}
-
-.hm-social-lock svg {
-  width: 60%;
-  height: 60%;
-  fill: #ffffff;
-}
-
 /* The dialog lives inside the frame, so it is sized in design units; it
    inherits the section's pointer-events: none, so it takes them back. */
 .hm-cform {
