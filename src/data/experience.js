@@ -1,5 +1,5 @@
 // Professional experience, from the EXPERIENCE section of
-// public/Aman Yadav — Resume.pdf. Each summary condenses that role's bullets
+// private/Aman Yadav — Resume.pdf. Each summary condenses that role's bullets
 // in the resume's own terms; keep them to about two lines so the timeline
 // fits the panel. Newest first.
 export const roles = [
@@ -13,12 +13,12 @@ export const roles = [
     tags: ['OAuth', 'CPaaS', 'RAG', 'AppSec'],
   },
   {
-    role: 'Cybersecurity Intern',
+    role: 'Associate Cybersecurity Engineer',
     company: 'Havok Security',
-    period: 'Jul 2024 – Jan 2025',
+    period: 'Jul 2024 – Jul 2025',
     summary:
-      'Web-application vulnerability analysis with PortSwigger tooling, network mapping and traffic analysis for threat detection, and hands-on SOC training on Kali Linux.',
-    tags: ['PortSwigger', 'SOC', 'Kali Linux'],
+      'Full-time, remote. Web-app vulnerability analysis with PortSwigger tooling, network mapping and traffic analysis, and Kali Linux security assessments with SOC practice.',
+    tags: ['PortSwigger', 'Kali Linux', 'SOC'],
   },
   {
     role: 'Cyber Security Intern',

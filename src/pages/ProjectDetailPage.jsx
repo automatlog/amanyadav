@@ -15,7 +15,10 @@ function ProjectDetailPage() {
     return <Navigate replace to="/projects" />
   }
 
-  const others = projects.filter((p) => p.slug !== project.slug)
+  // the next four in catalog order, wrapping round to the start
+  const at = projects.indexOf(project)
+  const others = [1, 2, 3, 4].map((step) => projects[(at + step) % projects.length])
+  const hasBrief = Boolean(project.problem) || project.highlights.length > 0
 
   return (
     <PageShell code={project.serial} crumb={project.name}>
@@ -24,7 +27,7 @@ function ProjectDetailPage() {
         <div>
           <div className="flex flex-wrap items-center gap-3">
             <SerialTag>{project.status}</SerialTag>
-            <MonoLabel className="text-[#5a5a5a]">{project.year}</MonoLabel>
+            {project.year && <MonoLabel className="text-[#5a5a5a]">{project.year}</MonoLabel>}
           </div>
           <MonoLabel className="mt-6 block text-[#ff5a00]">{project.kicker}</MonoLabel>
           <h1 className="mt-2 text-[clamp(40px,7vw,88px)] uppercase leading-[0.92] text-white" style={azonix}>
@@ -62,39 +65,47 @@ function ProjectDetailPage() {
         </HudPlate>
       </div>
 
-      {/* Metrics dials */}
-      <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {project.metrics.map((metric) => (
-          <HudPlate className="flex items-center gap-4 p-5" key={metric.label}>
-            <Dial label={metric.value} size={72} value={100} />
-            <span className="text-[12px] uppercase leading-snug tracking-[0.1em] text-[#b0b0b0]" style={mono}>
-              {metric.label}
-            </span>
-          </HudPlate>
-        ))}
-      </div>
+      {/* Metrics dials — only for projects that have real numbers */}
+      {project.metrics.length > 0 && (
+        <div className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {project.metrics.map((metric) => (
+            <HudPlate className="flex items-center gap-4 p-5" key={metric.label}>
+              <Dial label={metric.value} size={72} value={100} />
+              <span className="text-[12px] uppercase leading-snug tracking-[0.1em] text-[#b0b0b0]" style={mono}>
+                {metric.label}
+              </span>
+            </HudPlate>
+          ))}
+        </div>
+      )}
 
       {/* Problem + highlights */}
-      <div className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-2">
-        <div>
-          <MonoLabel className="text-[#ff5a00]">THE BRIEF</MonoLabel>
-          <p className="mt-4 text-[15px] leading-relaxed text-[#c4c4c4]" style={interFont}>
-            {project.problem}
-          </p>
-          <Waveform className="mt-6 w-full" />
+      {hasBrief && (
+        <div className="mt-14 grid grid-cols-1 gap-8 lg:grid-cols-2">
+          {project.problem && (
+            <div>
+              <MonoLabel className="text-[#ff5a00]">THE BRIEF</MonoLabel>
+              <p className="mt-4 text-[15px] leading-relaxed text-[#c4c4c4]" style={interFont}>
+                {project.problem}
+              </p>
+              <Waveform className="mt-6 w-full" />
+            </div>
+          )}
+          {project.highlights.length > 0 && (
+            <div>
+              <MonoLabel className="text-[#ff5a00]">WHAT I BUILT</MonoLabel>
+              <ul className="mt-4 space-y-3">
+                {project.highlights.map((item) => (
+                  <li className="flex gap-3 text-[14px] leading-relaxed text-[#c4c4c4]" key={item} style={interFont}>
+                    <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-[#ff5a00]" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
-        <div>
-          <MonoLabel className="text-[#ff5a00]">WHAT I BUILT</MonoLabel>
-          <ul className="mt-4 space-y-3">
-            {project.highlights.map((item) => (
-              <li className="flex gap-3 text-[14px] leading-relaxed text-[#c4c4c4]" key={item} style={interFont}>
-                <span aria-hidden className="mt-2 h-1.5 w-1.5 shrink-0 rotate-45 bg-[#ff5a00]" />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      )}
 
       {/* Stack */}
       <div className="mt-14">

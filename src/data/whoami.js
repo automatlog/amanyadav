@@ -2,7 +2,7 @@
 //
 // The intro is "spoken" from the cut-corner card beside the photo, typed out
 // line by line. Taken from the summary at the top of the resume
-// (public/Aman Yadav — Resume.pdf), put in the first person. EDIT freely: the
+// (private/Aman Yadav — Resume.pdf), put in the first person. EDIT freely: the
 // layout reserves each line's full size up front, so nothing jumps as it types.
 export const introLines = [
   "Hi, I'm Aman Yadav.",

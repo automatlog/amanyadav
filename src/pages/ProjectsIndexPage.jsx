@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom'
 import PageShell from '../components/PageShell'
 import { BarcodeStrip, HudBrackets, HudPlate, MonoLabel, SerialTag } from '../components/hud/Hud'
-import { projects } from '../data/projects'
+import { clients, projects } from '../data/projects'
 
 function CoverArt({ project }) {
   if (project.cover) {
@@ -59,7 +59,7 @@ function ProjectsIndexPage() {
             </div>
 
             <div className="mt-5 flex items-center justify-between border-t border-[#1c1c1c] pt-4">
-              <MonoLabel className="text-[#5a5a5a]">{project.year}</MonoLabel>
+              <MonoLabel className="text-[#5a5a5a]">{project.year || project.stack.slice(0, 2).join(' · ')}</MonoLabel>
               <span className="text-[11px] uppercase tracking-[0.2em] text-[#ff5a00] transition-transform group-hover:translate-x-1" style={{ fontFamily: 'MartianMono, monospace' }}>
                 Open ›
               </span>
@@ -67,6 +67,40 @@ function ProjectsIndexPage() {
           </HudPlate>
         ))}
       </div>
+
+      <section aria-labelledby="clients-heading" className="mt-14">
+        <h2
+          className="text-[10px] uppercase tracking-[0.22em] text-[#5a5a5a]"
+          id="clients-heading"
+          style={{ fontFamily: 'MartianMono, monospace' }}
+        >
+          Also worked with
+        </h2>
+        <ul className="mt-4 flex flex-wrap gap-2.5">
+          {clients.map((client) => (
+            <li key={client.name}>
+              {client.link ? (
+                <a
+                  className="inline-block rounded-[6px] border border-[#2a2a2a] bg-[#141414] px-3 py-2 text-[12px] uppercase tracking-[0.1em] text-[#d6d6d6] transition-colors hover:border-[#ff5a00] hover:text-[#ff5a00]"
+                  href={client.link}
+                  rel="noreferrer"
+                  style={{ fontFamily: 'MartianMono, monospace' }}
+                  target="_blank"
+                >
+                  {client.name} ›
+                </a>
+              ) : (
+                <span
+                  className="inline-block rounded-[6px] border border-[#2a2a2a] bg-[#141414] px-3 py-2 text-[12px] uppercase tracking-[0.1em] text-[#8a8a8a]"
+                  style={{ fontFamily: 'MartianMono, monospace' }}
+                >
+                  {client.name}
+                </span>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
 
       <BarcodeStrip className="mt-12" serial={`${projects.length} SPECIMENS CATALOGUED`} />
     </PageShell>

@@ -1,7 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
 /**
  * Skill marks for the Skills rack — the stack from the SKILLS and EXPERIENCE
- * sections of public/Aman Yadav — Resume.pdf, grouped security -> languages
+ * sections of private/Aman Yadav — Resume.pdf, grouped security -> languages
  * -> apps -> AI -> infrastructure, so related tools pass by together.
  *
  * Icons are Simple Icons (CC0), each in its brand colour. Azure and AWS are

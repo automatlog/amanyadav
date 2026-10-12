@@ -663,15 +663,13 @@
   }
 }
 
-/* A landscape site shot cropped to this 147x196 card takes a narrow vertical
-   slice. Anchoring that slice LEFT lands it on the site's logo and nav rather
-   than slicing through centred headline text mid-word. A real portrait asset
-   (as Evara has) still wins — see `portrait` in WORKS. */
+/* The card art is always a portrait asset (see `portrait` in WORKS), so it
+   is anchored to the top: a phone capture's header and logo stay in view. */
 .hm-work-art {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: left top;
+  object-position: center top;
   display: block;
 }
 

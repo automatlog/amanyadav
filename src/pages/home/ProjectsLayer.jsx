@@ -6,7 +6,9 @@ import liveliferehabLogo from '../../images/collab-png/liveliferehab.png'
 import raheebLogo from '../../images/collab-png/raheeb_s-perfume.png'
 import zophuLogo from '../../images/collab-png/zophu-white.png'
 import evaraLinktree from '../../images/projects-img/Evara Linktree.png'
+import liveIndiaMobile from '../../images/projects-img/liveliferehab-mobile.webp'
 import liveIndia from '../../images/projects-img/liveliferehabindia.png'
+import raheebMobile from '../../images/projects-img/raheeb-mobile.webp'
 import raheebSite from '../../images/projects-img/raheeb perfumes.png'
 import { Box, RBox, Stroked, Torx, border, roundedPath, type, u } from './canvas'
 
@@ -20,14 +22,17 @@ import { Box, RBox, Stroked, Torx, border, roundedPath, type, u } from './canvas
  */
 
 /* One entry per strip slot. `shot` is the landscape screen image; `portrait`
-   overrides the card art when a tall asset exists. Clients with neither fall
-   back to a brand card, which is also what the screen shows for them. */
+   is the tall card art — for the websites, the live site captured at phone
+   width (390 x 520). A landscape shot is never cropped into the card: a 3:4
+   slice of a desktop page lands on whatever happens to be there (for
+   Raheeb, a blank gold gradient). Clients without a portrait get the brand
+   card instead, which is also what the screen shows when there is no shot. */
 const WORKS = [
   { key: 'havoksec', name: 'HavokSec', logo: havoksecLogo },
   { key: 'zophu', name: 'Zophu', logo: zophuLogo },
-  { key: 'liveliferehab', name: 'Live Life Rehab', logo: liveliferehabLogo, shot: liveIndia },
+  { key: 'liveliferehab', name: 'Live Life Rehab', logo: liveliferehabLogo, shot: liveIndia, portrait: liveIndiaMobile },
   { key: 'evara', name: 'Evara', logo: evaraLogo, shot: evaraLinktree, portrait: evaraLinktree },
-  { key: 'raheeb', name: 'Raheeb’s Perfumes', logo: raheebLogo, shot: raheebSite },
+  { key: 'raheeb', name: 'Raheeb’s Perfumes', logo: raheebLogo, shot: raheebSite, portrait: raheebMobile },
 ]
 
 const SLIDE_MS = 5200
@@ -383,7 +388,7 @@ function ProjectsLayer() {
       <Stroked r={10} stroke={[2, '#000000']} style={{ background: '#111111' }} w={BAR.w} h={BAR.h} x={BAR.x} y={BAR.y} />
 
       {slots.map((slot, i) => {
-        const art = slot.work.portrait || slot.work.shot
+        const art = slot.work.portrait
         return (
           <Stroked
             aria-current={slot.active ? 'true' : undefined}

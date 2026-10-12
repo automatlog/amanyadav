@@ -14,7 +14,7 @@ export const homeNavItems = [
   { label: 'Contact', target: 'contact' },
 ]
 
-// From the header of public/Aman Yadav — Resume.pdf. The phone is not here:
+// From the header of private/Aman Yadav — Resume.pdf. The phone is not here:
 // it is unlocked by the contact form (data/contactForm.js).
 export const contactInfo = {
   email: 'automatlog@gmail.com',

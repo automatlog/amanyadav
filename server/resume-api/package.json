@@ -1,0 +1,16 @@
+{
+  "name": "automatlog-resume-api",
+  "private": true,
+  "type": "module",
+  "description": "Gated résumé download for automatlog.in — see index.mjs",
+  "main": "index.mjs",
+  "scripts": {
+    "start": "node index.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "nodemailer": "10.0.12"
+  }
+}

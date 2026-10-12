@@ -11,7 +11,7 @@ import { Box, RBox, Torx, border, roundedPath, type, u } from './canvas'
 
 /* Rectangle 39359 x3 — card y from the export; titles keep their own box. */
 /* Each card's body is from the EDUCATION, CERTIFICATIONS and COMMUNITY
-   sections of public/Aman Yadav — Resume.pdf. */
+   sections of private/Aman Yadav — Resume.pdf. */
 const CARDS = [
   {
     title: 'Education',

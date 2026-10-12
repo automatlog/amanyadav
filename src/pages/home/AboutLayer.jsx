@@ -1,4 +1,5 @@
 /* eslint-disable react/prop-types */
+import { useResumeGate } from '../../components/useResumeGate'
 import { Box, RBox, Stage, Stroked, Torx, border, roundedPath, type, u } from './canvas'
 import { heroContent } from './content'
 
@@ -22,7 +23,6 @@ import { heroContent } from './content'
  * y returns to the Figma 413.99. Measuring the reference put it at 419.3,
  * inside the error of that reading, so the export value stands.
  */
-const RESUME_FILE = 'Aman Yadav — Resume.pdf'
 const RESUME_X = 2.83
 const RESUME_Y = 413.99
 
@@ -116,6 +116,9 @@ function Tick({ x, y, w }) {
 }
 
 function AboutLayer() {
+  // asks for an email the first time (see components/ResumeGate)
+  const resumeGate = useResumeGate()
+
   return (
     <>
       {/* entrance step 3: status — the cluster, the roles, Resume */}
@@ -190,12 +193,12 @@ function AboutLayer() {
             offset by that 5. The click target and focus ring then match what
             is drawn, and the pill's outer edge shares the disc's rail. */}
         <Box
+          aria-haspopup="dialog"
           aria-label="Download resume (PDF)"
-          as="a"
+          as="button"
           className="hm-resume hm-press"
-          download={RESUME_FILE}
-          href={encodeURI(`/${RESUME_FILE}`)}
-          type="application/pdf"
+          onClick={resumeGate.onClick}
+          type="button"
           w={161.98 + 10}
           h={49.99 + 10}
           x={RESUME_X - 5}
@@ -229,7 +232,7 @@ function AboutLayer() {
             </svg>
           </Box>
         </Box>
-
+        {resumeGate.dialog}
       </Stage>
       {/* entrance step 4: the hero card */}
       <Stage step={3}>
